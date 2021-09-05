@@ -10,8 +10,7 @@ namespace Isu.Entities
 
         internal Group(GroupName name)
         {
-            name.ThrowIfNull(nameof(name));
-            Name = name;
+            Name = name.ThrowIfNull(nameof(name));
         }
 
         public GroupName Name { get; }
