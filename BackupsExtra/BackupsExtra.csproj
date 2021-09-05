@@ -8,11 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EditorConfigFiles Remove="D:\coding\itmo-mentor\OopLabs-template\.editorconfig" />
+    <EditorConfigFiles Remove="..\.editorconfig" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="D:\coding\itmo-mentor\OopLabs-template\.editorconfig" />
+    <None Include="..\.editorconfig" />
   </ItemGroup>
 
   <ItemGroup>
