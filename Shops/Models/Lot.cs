@@ -1,10 +1,12 @@
+using Utility.Extensions;
+
 namespace Shops.Models
 {
     public struct Lot
     {
         public Lot(Product product, double price, int amount)
         {
-            Product = product;
+            Product = product.ThrowIfNull(nameof(product));
             Price = price;
             Amount = amount;
         }

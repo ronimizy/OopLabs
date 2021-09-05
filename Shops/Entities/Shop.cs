@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Shops.Models;
 using Shops.Tools;
+using Utility.Extensions;
 
 namespace Shops.Entities
 {
@@ -9,15 +10,17 @@ namespace Shops.Entities
     {
         private readonly List<Lot> _lots;
 
-        public Shop(int id, string name, string location)
+        internal Shop(int id, string name, string location, int managerId)
         {
             Id = id;
-            Name = name;
-            Location = location;
+            Name = name.ThrowIfNull(nameof(name));
+            Location = location.ThrowIfNull(nameof(location));
+            ManagerId = managerId;
             _lots = new List<Lot>();
         }
 
         public int Id { get; }
+        public int ManagerId { get; }
         public string Name { get; }
         public string Location { get; }
         public double Balance { get; private set; }
@@ -25,8 +28,13 @@ namespace Shops.Entities
 
         public Shop AddProducts(params Lot[] shipment)
         {
+            shipment.ThrowIfNull(nameof(shipment));
+
             foreach (Lot lot in shipment)
             {
+                if (ManagerId != lot.Product.ManagerId)
+                    throw ShopsExceptionFactory.AlienProductException(this, lot.Product);
+
                 int index = _lots.FindIndex(l => l.Product.Equals(lot.Product));
                 if (index == -1)
                 {
@@ -36,7 +44,7 @@ namespace Shops.Entities
                 {
                     Lot existingLot = _lots[index];
                     existingLot.Amount += lot.Amount;
-                    if (Math.Abs(existingLot.Price - lot.Price) > 0.01)
+                    if (Math.Abs(existingLot.Price - lot.Price) > 0.0001)
                         existingLot.Price = ResolveNewPrice(existingLot.Price, lot.Price);
 
                     _lots[index] = existingLot;
@@ -48,6 +56,12 @@ namespace Shops.Entities
 
         public Shop Buy(Person person, Product product, int amount)
         {
+            person.ThrowIfNull(nameof(person));
+            product.ThrowIfNull(nameof(product));
+
+            if (ManagerId != product.ManagerId)
+                throw ShopsExceptionFactory.AlienProductException(this, product);
+
             int index = _lots.FindIndex(l => l.Product.Equals(product));
             if (index == -1)
                 throw ShopsExceptionFactory.NonExisingProductException(this, product);
@@ -57,18 +71,38 @@ namespace Shops.Entities
             if (lot.Amount < amount)
                 throw ShopsExceptionFactory.InsufficientProductAmountException(this, product, amount, lot.Amount);
 
-            double price = lot.Price * amount;
+            double totalPrice = lot.Price * amount;
 
-            if (person.Balance < price)
-                throw ShopsExceptionFactory.InsufficientFundsException(price, person.Balance);
+            if (person.Balance < totalPrice)
+                throw ShopsExceptionFactory.InsufficientFundsException(totalPrice, person.Balance);
 
-            person.WriteMoneyOff(price);
-            Balance += price;
-
-            person.Ship(new Lot(lot.Product, lot.Price, amount));
+            person.SendBill(totalPrice);
+            Balance += totalPrice;
 
             lot.Amount -= amount;
             _lots[index] = lot;
+
+            return this;
+        }
+
+        public Shop SetPriceFor(Product product, double price)
+        {
+            product.ThrowIfNull(nameof(product));
+
+            if (ManagerId != product.ManagerId)
+                throw ShopsExceptionFactory.AlienProductException(this, product);
+
+            int index = _lots.FindIndex(l => l.Product.Equals(product));
+            if (index == -1)
+            {
+                _lots.Add(new Lot(product, price, 0));
+            }
+            else
+            {
+                Lot lot = _lots[index];
+                lot.Price = price;
+                _lots[index] = lot;
+            }
 
             return this;
         }

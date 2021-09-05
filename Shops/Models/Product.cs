@@ -1,19 +1,22 @@
 using System;
+using Utility.Extensions;
 
 namespace Shops.Models
 {
     public class Product : IEquatable<Product>
     {
-        public Product(int id, string name, string description)
+        internal Product(int id, string name, string description, int managerId)
         {
             Id = id;
-            Name = name;
-            Description = description;
+            Name = name.ThrowIfNull(nameof(name));
+            Description = description.ThrowIfNull(nameof(description));
+            ManagerId = managerId;
         }
 
         public int Id { get; }
         public string Name { get; }
         public string Description { get; }
+        public int ManagerId { get; }
 
         public bool Equals(Product? other)
         {
