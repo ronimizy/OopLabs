@@ -1,51 +1,69 @@
-using Isu.Services;
+using System.Linq;
+using Isu.Entities;
 using Isu.Tools;
+using Isu.Models;
+using Isu.Services;
 using NUnit.Framework;
 
 namespace Isu.Tests
 {
+    [TestFixture]
     public class Tests
     {
-        private IIsuService _isuService;
+        private IIsuService _service;
+        private IsuApplicationConfiguration _configuration;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
-            //TODO: implement
-            _isuService = null;
+            _configuration = new IsuApplicationConfiguration
+            {
+                MaxStudentCount = 20
+            };
+            _service = IIsuService.Create(_configuration);
         }
 
         [Test]
         public void AddStudentToGroup_StudentHasGroupAndGroupContainsStudent()
         {
-            Assert.Fail();
+            Group group = _service.AddGroup(new GroupName("M3200"));
+            Student student = _service.AddStudent(group, "Student A");
+
+            Assert.AreEqual(student.Group, group);
+            Assert.IsTrue(group.Students.Contains(student));
         }
 
         [Test]
         public void ReachMaxStudentPerGroup_ThrowException()
         {
-            Assert.Catch<IsuException>(() =>
-            {
-                
-            });
+            Group group = _service.AddGroup(new GroupName("M3202"));
+
+            for (int i = 0; i < _configuration.MaxStudentCount; i++)
+                _service.AddStudent(group, $"Student D{i}");
+
+            Assert.Throws<IsuException>(() => _service.AddStudent(group, $"Student D{_configuration.MaxStudentCount}"));
         }
 
         [Test]
-        public void CreateGroupWithInvalidName_ThrowException()
-        {
-            Assert.Catch<IsuException>(() =>
-            {
-
-            });
-        }
+        [TestCase("M32001")]
+        [TestCase("33200")]
+        [TestCase("Z320a")]
+        [TestCase("M320a")]
+        [TestCase("M4200")]
+        public void CreateGroupWithInvalidName_ThrowException(string name)
+            => Assert.Throws<IsuException>(() => _service.AddGroup(new GroupName(name)));
 
         [Test]
         public void TransferStudentToAnotherGroup_GroupChanged()
         {
-            Assert.Catch<IsuException>(() =>
-            {
+            Group from = _service.AddGroup(new GroupName("M3204"));
+            Group to = _service.AddGroup(new GroupName("M3205"));
 
-            });
+            Student student = _service.AddStudent(from, "Student C");
+
+            _service.ChangeStudentGroup(student, to);
+
+            Assert.AreEqual(student.Group, to);
         }
     }
 }
