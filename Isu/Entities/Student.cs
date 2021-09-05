@@ -1,4 +1,5 @@
 using System;
+using Utility.Extensions;
 
 namespace Isu.Entities
 {
@@ -7,8 +8,8 @@ namespace Isu.Entities
         internal Student(int id, string name, Group group)
         {
             Id = id;
-            Name = name;
-            Group = group;
+            Name = name.ThrowIfNull(nameof(name));
+            Group = group.ThrowIfNull(nameof(group));
         }
 
         public int Id { get; init; }

@@ -42,7 +42,7 @@ namespace Isu.Services.Implementations
                 throw IsuExceptionFactory.AlienGroupException(group);
 
             if (group.Students.Count == _configuration.MaxStudentCount)
-                throw IsuExceptionFactory.MaximumStudentCount(_configuration.MaxStudentCount);
+                throw IsuExceptionFactory.MaximumStudentCount(group, _configuration.MaxStudentCount);
 
             var student = new Student(GetNewStudentId(), name, group);
             group.AddStudent(student);
@@ -104,6 +104,9 @@ namespace Isu.Services.Implementations
 
             if (!_groups.Contains(newGroup))
                 throw IsuExceptionFactory.AlienGroupException(newGroup);
+
+            if (newGroup.Students.Count == _configuration.MaxStudentCount)
+                throw IsuExceptionFactory.MaximumStudentCount(newGroup, _configuration.MaxStudentCount);
 
             student.Group.RemoveStudent(student);
             student.Group = newGroup;

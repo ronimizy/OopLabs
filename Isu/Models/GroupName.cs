@@ -1,5 +1,6 @@
 using System;
 using Isu.Tools;
+using Utility.Extensions;
 
 namespace Isu.Models
 {
@@ -7,7 +8,7 @@ namespace Isu.Models
     {
         public GroupName(string name)
         {
-            Name = Validate(name);
+            Name = Validate(name.ThrowIfNull(nameof(name)));
             CourseNumber = new CourseNumber(GetCourseNumberFromGroupName(Name));
         }
 

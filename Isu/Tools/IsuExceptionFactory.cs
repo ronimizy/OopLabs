@@ -20,7 +20,7 @@ namespace Isu.Tools
         public static IsuException AlienStudentException(Student student)
             => new ($"Grouped named '{student.Name}' doesn't being tracked by the service");
 
-        public static IsuException MaximumStudentCount(int count)
-            => new ($"One group can't hold more than {count} students");
+        public static IsuException MaximumStudentCount(Group group, int count)
+            => new ($"{group} group already has {count} students");
     }
 }
