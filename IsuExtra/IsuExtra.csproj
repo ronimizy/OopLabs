@@ -13,18 +13,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EditorConfigFiles Remove="D:\coding\itmo-mentor\OopLabs-template\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="D:\coding\itmo-mentor\OopLabs-template\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\.editorconfig">
+      <Link>OopLabs-template\.editorconfig</Link>
+    </Content>
   </ItemGroup>
 
 </Project>
