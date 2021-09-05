@@ -5,7 +5,7 @@ namespace Isu.Models
 {
     public readonly struct CourseNumber : IEquatable<CourseNumber>
     {
-        private const int MaxCourse = 8;
+        private const int MaxCourse = 4;
 
         public CourseNumber(int value)
         {
