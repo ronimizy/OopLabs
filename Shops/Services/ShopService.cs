@@ -30,9 +30,6 @@ namespace Shops.Services
 
         public void BuyCheapest(Person person, Product product, int amount)
         {
-            person.ThrowIfNull(nameof(person));
-            product.ThrowIfNull(nameof(product));
-
             if (amount < 0)
                 throw ShopsExceptionFactory.NegativeAmountException(amount);
 
