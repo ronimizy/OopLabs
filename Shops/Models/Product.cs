@@ -1,22 +1,23 @@
 using System;
+using Shops.Tools;
 using Utility.Extensions;
 
 namespace Shops.Models
 {
     public class Product : IEquatable<Product>
     {
-        internal Product(int id, string name, string description, int serviceId)
+        private static readonly IdGenerator IdGenerator = new ();
+
+        internal Product(string name, string description)
         {
-            Id = id;
+            Id = IdGenerator.Next();
             Name = name.ThrowIfNull(nameof(name));
             Description = description.ThrowIfNull(nameof(description));
-            ServiceId = serviceId;
         }
 
         public int Id { get; }
         public string Name { get; }
         public string Description { get; }
-        public int ServiceId { get; }
 
         public bool Equals(Product? other)
         {

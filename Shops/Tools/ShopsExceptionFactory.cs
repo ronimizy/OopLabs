@@ -20,8 +20,7 @@ namespace Shops.Tools
         public static ShopException NonExisingProductException(Shop shop, Product product)
             => new ShopException($"{shop} doesn't have a {product}");
 
-        public static ShopException AlienProductException(Shop shop, Product product)
-            => new ShopException($"Trying to interact with {shop} from manager with id {shop.ServiceId}, " +
-                                 $"by product {product} from manager with id {product.ServiceId}");
+        public static ShopException NoShopFoundException(Product product, int amount)
+            => new ShopException($"No shop was found containing {product} with amount equal {amount}");
     }
 }

@@ -1,4 +1,5 @@
 using Shops.Tools;
+using Utility.Extensions;
 
 namespace Shops.Entities
 {
@@ -6,7 +7,7 @@ namespace Shops.Entities
     {
         public Person(string name, double balance)
         {
-            Name = name;
+            Name = name.ThrowIfNull(nameof(name));
             Balance = balance;
         }
 

@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using Shops.Models;
 using Shops.Tools;
 using Utility.Extensions;
@@ -8,23 +8,20 @@ namespace Shops.Entities
 {
     public sealed class Shop
     {
+        private static readonly IdGenerator IdGenerator = new ();
         private readonly List<Lot> _lots;
 
-        internal Shop(int id, string name, string location, int serviceId)
+        internal Shop(string name, string location)
         {
-            Id = id;
+            Id = IdGenerator.Next();
             Name = name.ThrowIfNull(nameof(name));
             Location = location.ThrowIfNull(nameof(location));
-            ServiceId = serviceId;
             _lots = new List<Lot>();
         }
 
         public int Id { get; }
-        public int ServiceId { get; }
         public string Name { get; }
         public string Location { get; }
-        public double Balance { get; private set; }
-        public IReadOnlyList<Lot> Lots => _lots;
 
         public Shop AddProducts(params Lot[] shipment)
         {
@@ -32,22 +29,15 @@ namespace Shops.Entities
 
             foreach (Lot lot in shipment)
             {
-                if (ServiceId != lot.Product.ServiceId)
-                    throw ShopsExceptionFactory.AlienProductException(this, lot.Product);
-
-                int index = _lots.FindIndex(l => l.Product.Equals(lot.Product));
-                if (index == -1)
+                Lot? exisingLot = ProductLotOrDefault(lot.Product);
+                if (exisingLot is null)
                 {
                     _lots.Add(lot);
                 }
                 else
                 {
-                    Lot existingLot = _lots[index];
-                    existingLot.Amount += lot.Amount;
-                    if (Math.Abs(existingLot.Price - lot.Price) > 0.0001)
-                        existingLot.Price = ResolveNewPrice(existingLot.Price, lot.Price);
-
-                    _lots[index] = existingLot;
+                    exisingLot.ChangeAmountBy(lot.Amount);
+                    exisingLot.ProposeNewPrice(lot.Price);
                 }
             }
 
@@ -62,28 +52,17 @@ namespace Shops.Entities
             person.ThrowIfNull(nameof(person));
             product.ThrowIfNull(nameof(product));
 
-            if (ServiceId != product.ServiceId)
-                throw ShopsExceptionFactory.AlienProductException(this, product);
-
-            int index = _lots.FindIndex(l => l.Product.Equals(product));
-            if (index == -1)
+            Lot? lot = ProductLotOrDefault(product);
+            if (lot is null)
                 throw ShopsExceptionFactory.NonExisingProductException(this, product);
-
-            Lot lot = _lots[index];
 
             if (lot.Amount < amount)
                 throw ShopsExceptionFactory.InsufficientProductAmountException(product, amount, lot.Amount);
 
             double totalPrice = lot.Price * amount;
 
-            if (person.Balance < totalPrice)
-                throw ShopsExceptionFactory.InsufficientFundsException(totalPrice, person.Balance);
-
             person.SendBill(totalPrice);
-            Balance += totalPrice;
-
-            lot.Amount -= amount;
-            _lots[index] = lot;
+            lot.ChangeAmountBy(-amount);
 
             return this;
         }
@@ -95,30 +74,34 @@ namespace Shops.Entities
 
             product.ThrowIfNull(nameof(product));
 
-            if (ServiceId != product.ServiceId)
-                throw ShopsExceptionFactory.AlienProductException(this, product);
-
-            int index = _lots.FindIndex(l => l.Product.Equals(product));
-            if (index == -1)
-            {
+            Lot? lot = ProductLotOrDefault(product);
+            if (lot is null)
                 _lots.Add(new Lot(product, price, 0));
-            }
             else
-            {
-                Lot lot = _lots[index];
-                lot.Price = price;
-                _lots[index] = lot;
-            }
+                lot.SetNewPrice(price);
 
             return this;
         }
 
+        public bool ProductsAvailable(Product product, int amount)
+        {
+            Lot? lot = _lots.SingleOrDefault(l => l.Product.Equals(product) && l.Amount >= amount);
+            return lot is not null;
+        }
+
+        public Lot? ProductLotOrDefault(Product product)
+            => _lots.SingleOrDefault(l => l.Product.Equals(product));
+
+        public Lot ProductLot(Product product)
+        {
+            Lot? lot = ProductLotOrDefault(product);
+            if (lot is null)
+                throw ShopsExceptionFactory.NonExisingProductException(this, product);
+
+            return lot;
+        }
+
         public override string ToString()
             => $"[{Id}] {Name}";
-
-        private static double ResolveNewPrice(double oldPrice, double newPrice)
-        {
-            return Math.Max(oldPrice, newPrice);
-        }
     }
 }
