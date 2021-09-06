@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using NUnit.Framework;
 using Shops.Entities;
 using Shops.Models;
@@ -40,11 +39,29 @@ namespace Shops.Tests
 
             _shop.AddProducts(new Lot(_product, price, amount));
 
-            Assert.AreEqual(1, _shop.Lots.Count);
+            Assert.IsTrue(_shop.ProductAvailable(_product, amount));
 
-            Assert.AreSame(_product, _shop.Lots.Single().Product);
-            Assert.AreEqual(price, _shop.Lots.Single().Price);
-            Assert.AreEqual(amount, _shop.Lots.Single().Amount);
+            Lot lot = _shop.ProductLot(_product);
+
+            Assert.AreSame(_product, lot.Product);
+            Assert.AreEqual(price, lot.Price);
+            Assert.AreEqual(amount, lot.Amount);
+        }
+
+        [Test]
+        public void AddExisingProductTest_ProductAdded_PriceChanged()
+        {
+            const double firstPrice = 10;
+            const double secondPrice = 2 * firstPrice;
+            const int amount = 10;
+
+            _shop.AddProducts(new Lot(_product, firstPrice, amount))
+                .AddProducts(new Lot(_product, secondPrice, amount));
+
+            Lot lot = _shop.ProductLot(_product);
+            
+            Assert.AreEqual(2 * amount, lot.Amount);
+            Assert.AreEqual(secondPrice, lot.Price);
         }
 
         [Test]
@@ -56,7 +73,9 @@ namespace Shops.Tests
             _shop.AddProducts(new Lot(_product, oldPrice, 0))
                 .SetPriceFor(_product, newPrice);
 
-            Assert.AreEqual(newPrice, _shop.Lots.Single().Price);
+            Lot lot = _shop.ProductLot(_product);
+
+            Assert.AreEqual(newPrice, lot.Price);
         }
 
         [Test]
@@ -65,8 +84,9 @@ namespace Shops.Tests
             const int newPrice = 30;
 
             _shop.SetPriceFor(_product, newPrice);
+            Lot lot = _shop.ProductLot(_product);
 
-            Assert.AreEqual(newPrice, _shop.Lots.Single().Price);
+            Assert.AreEqual(newPrice, lot.Price);
         }
 
         [Test]
