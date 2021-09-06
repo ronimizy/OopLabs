@@ -83,10 +83,10 @@ namespace Shops.Entities
             return this;
         }
 
-        public bool ProductsAvailable(Product product, int amount)
+        public bool ProductAvailable(Product product, int amount)
         {
-            Lot? lot = _lots.SingleOrDefault(l => l.Product.Equals(product) && l.Amount >= amount);
-            return lot is not null;
+            Lot? lot = _lots.SingleOrDefault(l => l.Product.Equals(product));
+            return lot is not null && lot.Amount >= amount;
         }
 
         public Lot? ProductLotOrDefault(Product product)

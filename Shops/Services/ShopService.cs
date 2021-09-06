@@ -40,7 +40,7 @@ namespace Shops.Services
             product.ThrowIfNull(nameof(product));
 
             var package = _shops
-                .Where(s => s.ProductsAvailable(product, 1))
+                .Where(s => s.ProductAvailable(product, 1))
                 .Select(s => new { shop = s, lot = s.ProductLot(product) })
                 .OrderBy(p => p.lot.Price)
                 .FirstOrDefault(p => p.lot.Amount >= amount);
