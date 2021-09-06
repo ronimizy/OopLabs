@@ -36,16 +36,15 @@ namespace Shops.Services
             person.ThrowIfNull(nameof(person));
             product.ThrowIfNull(nameof(product));
 
-            var package = _shops
+            Shop? shop = _shops
                 .Where(s => s.ProductAvailable(product, 1))
-                .Select(s => new { shop = s, lot = s.ProductLot(product) })
-                .OrderBy(p => p.lot.Price)
-                .FirstOrDefault(p => p.lot.Amount >= amount);
+                .OrderBy(s => s.ProductLot(product).Price)
+                .FirstOrDefault(s => s.ProductLot(product).Amount >= amount);
 
-            if (package is null)
+            if (shop is null)
                 throw ShopsExceptionFactory.NoShopFoundException(product, amount);
 
-            package.shop.Buy(person, product, amount);
+            shop.Buy(person, product, amount);
         }
     }
 }
