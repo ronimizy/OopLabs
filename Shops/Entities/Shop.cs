@@ -10,17 +10,17 @@ namespace Shops.Entities
     {
         private readonly List<Lot> _lots;
 
-        internal Shop(int id, string name, string location, int managerId)
+        internal Shop(int id, string name, string location, int serviceId)
         {
             Id = id;
             Name = name.ThrowIfNull(nameof(name));
             Location = location.ThrowIfNull(nameof(location));
-            ManagerId = managerId;
+            ServiceId = serviceId;
             _lots = new List<Lot>();
         }
 
         public int Id { get; }
-        public int ManagerId { get; }
+        public int ServiceId { get; }
         public string Name { get; }
         public string Location { get; }
         public double Balance { get; private set; }
@@ -32,7 +32,7 @@ namespace Shops.Entities
 
             foreach (Lot lot in shipment)
             {
-                if (ManagerId != lot.Product.ManagerId)
+                if (ServiceId != lot.Product.ServiceId)
                     throw ShopsExceptionFactory.AlienProductException(this, lot.Product);
 
                 int index = _lots.FindIndex(l => l.Product.Equals(lot.Product));
@@ -56,10 +56,13 @@ namespace Shops.Entities
 
         public Shop Buy(Person person, Product product, int amount)
         {
+            if (amount < 0)
+                throw ShopsExceptionFactory.NegativeAmountException(amount);
+
             person.ThrowIfNull(nameof(person));
             product.ThrowIfNull(nameof(product));
 
-            if (ManagerId != product.ManagerId)
+            if (ServiceId != product.ServiceId)
                 throw ShopsExceptionFactory.AlienProductException(this, product);
 
             int index = _lots.FindIndex(l => l.Product.Equals(product));
@@ -69,7 +72,7 @@ namespace Shops.Entities
             Lot lot = _lots[index];
 
             if (lot.Amount < amount)
-                throw ShopsExceptionFactory.InsufficientProductAmountException(this, product, amount, lot.Amount);
+                throw ShopsExceptionFactory.InsufficientProductAmountException(product, amount, lot.Amount);
 
             double totalPrice = lot.Price * amount;
 
@@ -87,9 +90,12 @@ namespace Shops.Entities
 
         public Shop SetPriceFor(Product product, double price)
         {
+            if (price < 0)
+                throw ShopsExceptionFactory.NegativePriceException(price);
+
             product.ThrowIfNull(nameof(product));
 
-            if (ManagerId != product.ManagerId)
+            if (ServiceId != product.ServiceId)
                 throw ShopsExceptionFactory.AlienProductException(this, product);
 
             int index = _lots.FindIndex(l => l.Product.Equals(product));

@@ -5,18 +5,18 @@ namespace Shops.Models
 {
     public class Product : IEquatable<Product>
     {
-        internal Product(int id, string name, string description, int managerId)
+        internal Product(int id, string name, string description, int serviceId)
         {
             Id = id;
             Name = name.ThrowIfNull(nameof(name));
             Description = description.ThrowIfNull(nameof(description));
-            ManagerId = managerId;
+            ServiceId = serviceId;
         }
 
         public int Id { get; }
         public string Name { get; }
         public string Description { get; }
-        public int ManagerId { get; }
+        public int ServiceId { get; }
 
         public bool Equals(Product? other)
         {
