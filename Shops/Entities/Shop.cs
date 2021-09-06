@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Shops.Models;
 using Shops.Tools;
 using Utility.Extensions;
@@ -9,14 +8,15 @@ namespace Shops.Entities
     public sealed class Shop
     {
         private static readonly IdGenerator IdGenerator = new ();
-        private readonly List<Lot> _lots;
+
+        private readonly Dictionary<int, Lot> _lots;
 
         internal Shop(string name, string location)
         {
             Id = IdGenerator.Next();
             Name = name.ThrowIfNull(nameof(name));
             Location = location.ThrowIfNull(nameof(location));
-            _lots = new List<Lot>();
+            _lots = new Dictionary<int, Lot>();
         }
 
         public int Id { get; }
@@ -32,7 +32,7 @@ namespace Shops.Entities
                 Lot? exisingLot = ProductLotOrDefault(lot.Product);
                 if (exisingLot is null)
                 {
-                    _lots.Add(lot);
+                    _lots.Add(lot.Product.Id, lot);
                 }
                 else
                 {
@@ -76,7 +76,7 @@ namespace Shops.Entities
 
             Lot? lot = ProductLotOrDefault(product);
             if (lot is null)
-                _lots.Add(new Lot(product, price, 0));
+                _lots.Add(product.Id, new Lot(product, price, 0));
             else
                 lot.SetNewPrice(price);
 
@@ -85,12 +85,12 @@ namespace Shops.Entities
 
         public bool ProductAvailable(Product product, int amount)
         {
-            Lot? lot = _lots.SingleOrDefault(l => l.Product.Equals(product));
+            Lot? lot = ProductLotOrDefault(product);
             return lot is not null && lot.Amount >= amount;
         }
 
         public Lot? ProductLotOrDefault(Product product)
-            => _lots.SingleOrDefault(l => l.Product.Equals(product));
+            => _lots.ContainsKey(product.Id) ? _lots[product.Id] : null;
 
         public Lot ProductLot(Product product)
         {
