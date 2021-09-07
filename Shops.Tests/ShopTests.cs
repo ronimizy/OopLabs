@@ -1,7 +1,6 @@
 using System;
 using NUnit.Framework;
 using Shops.Entities;
-using Shops.Models;
 using Shops.Services;
 using Shops.Tools;
 

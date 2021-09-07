@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Shops.Entities;
-using Shops.Models;
 using Shops.Tools;
 using Utility.Extensions;
 

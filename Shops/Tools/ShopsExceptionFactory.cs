@@ -1,5 +1,4 @@
 using Shops.Entities;
-using Shops.Models;
 
 namespace Shops.Tools
 {

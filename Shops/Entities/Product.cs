@@ -2,7 +2,7 @@ using System;
 using Shops.Tools;
 using Utility.Extensions;
 
-namespace Shops.Models
+namespace Shops.Entities
 {
     public class Product : IEquatable<Product>
     {
