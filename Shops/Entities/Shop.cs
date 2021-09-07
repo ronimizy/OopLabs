@@ -45,11 +45,11 @@ namespace Shops.Entities
 
         public Shop Buy(Person person, Product product, int amount)
         {
-            if (amount < 0)
-                throw ShopsExceptionFactory.NegativeAmountException(amount);
-
             person.ThrowIfNull(nameof(person));
             product.ThrowIfNull(nameof(product));
+
+            if (amount < 0)
+                throw ShopsExceptionFactory.NegativeAmountException(amount);
 
             Lot? lot = ProductLotOrDefault(product);
             if (lot is null)
@@ -68,10 +68,10 @@ namespace Shops.Entities
 
         public Shop SetPriceFor(Product product, double price)
         {
+            product.ThrowIfNull(nameof(product));
+
             if (price < 0)
                 throw ShopsExceptionFactory.NegativePriceException(price);
-
-            product.ThrowIfNull(nameof(product));
 
             Lot? lot = ProductLotOrDefault(product);
             if (lot is null)
