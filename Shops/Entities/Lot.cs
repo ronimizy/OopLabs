@@ -16,6 +16,7 @@ namespace Shops.Entities
         }
 
         public Product Product { get; }
+
         public double Price
         {
             get => _price;

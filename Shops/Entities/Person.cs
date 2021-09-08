@@ -1,3 +1,4 @@
+using System;
 using Shops.Tools;
 using Utility.Extensions;
 
@@ -7,6 +8,9 @@ namespace Shops.Entities
     {
         public Person(string name, double balance)
         {
+            if (balance < 0)
+                throw new ArgumentException("Balance can't be negative");
+
             Name = name.ThrowIfNull(nameof(name));
             Balance = balance;
         }
