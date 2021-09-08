@@ -38,13 +38,8 @@ namespace Shops.Tests
 
             _shop.AddProducts(new Lot(_product, price, amount));
 
-            Assert.IsTrue(_shop.ProductAvailable(_product, amount));
-
-            Lot lot = _shop.ProductLot(_product);
-
-            Assert.AreSame(_product, lot.Product);
-            Assert.AreEqual(price, lot.Price);
-            Assert.AreEqual(amount, lot.Amount);
+            Assert.AreEqual(price, _shop.ProductPrice(_product));
+            Assert.AreEqual(amount, _shop.ProductAmount(_product));
         }
 
         [Test]
@@ -57,10 +52,8 @@ namespace Shops.Tests
             _shop.AddProducts(new Lot(_product, firstPrice, amount))
                 .AddProducts(new Lot(_product, secondPrice, amount));
 
-            Lot lot = _shop.ProductLot(_product);
-            
-            Assert.AreEqual(2 * amount, lot.Amount);
-            Assert.AreEqual(secondPrice, lot.Price);
+            Assert.AreEqual(2 * amount, _shop.ProductAmount(_product));
+            Assert.AreEqual(secondPrice, _shop.ProductPrice(_product));
         }
 
         [Test]
@@ -72,9 +65,7 @@ namespace Shops.Tests
             _shop.AddProducts(new Lot(_product, oldPrice, 0))
                 .SetPriceFor(_product, newPrice);
 
-            Lot lot = _shop.ProductLot(_product);
-
-            Assert.AreEqual(newPrice, lot.Price);
+            Assert.AreEqual(newPrice, _shop.ProductPrice(_product));
         }
 
         [Test]
@@ -83,9 +74,8 @@ namespace Shops.Tests
             const int newPrice = 30;
 
             _shop.SetPriceFor(_product, newPrice);
-            Lot lot = _shop.ProductLot(_product);
 
-            Assert.AreEqual(newPrice, lot.Price);
+            Assert.AreEqual(newPrice, _shop.ProductPrice(_product));
         }
 
         [Test]
@@ -97,10 +87,10 @@ namespace Shops.Tests
             const double smallPrice = 20;
             const int largeAmount = 5;
             const int smallAmount = 1;
-            
+
             var poorPerson = new Person("Poor", poorBalance);
             var richPerson = new Person("Rich", richBalance);
-            
+
             Product expensiveProduct = _service.RegisterProduct("Expensive", "Really expensive");
 
             _shop.AddProducts(new Lot(_product, smallPrice, largeAmount),
@@ -118,10 +108,10 @@ namespace Shops.Tests
 
             const int firstPrice = 10;
             const int secondPrice = 20;
-            
+
             const int firstCount = 20;
             const int secondCount = 10;
-            
+
             Shop anotherShop = _service.CreateShop("Another Shop", "Another Location");
             var person = new Person("Name", balance);
 

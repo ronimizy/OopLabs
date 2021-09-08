@@ -1,4 +1,3 @@
-using System;
 using Shops.Tools;
 using Utility.Extensions;
 
@@ -6,6 +5,9 @@ namespace Shops.Entities
 {
     public class Lot
     {
+        private double _price;
+        private int _amount;
+
         public Lot(Product product, double price, int amount)
         {
             Product = product.ThrowIfNull(nameof(product));
@@ -14,26 +16,24 @@ namespace Shops.Entities
         }
 
         public Product Product { get; }
-        public double Price { get; private set; }
-        public int Amount { get; private set; }
-
-        internal void ProposeNewPrice(double price)
+        public double Price
         {
-            double newPrice = Math.Max(Price, price);
-            ValidatePrice(newPrice);
-            Price = newPrice;
+            get => _price;
+            set
+            {
+                ValidatePrice(value);
+                _price = value;
+            }
         }
 
-        internal void SetNewPrice(double price)
+        public int Amount
         {
-            ValidatePrice(price);
-            Price = price;
-        }
-
-        internal void ChangeAmountBy(int value)
-        {
-            ValidateAmount(Amount + value);
-            Amount += value;
+            get => _amount;
+            set
+            {
+                ValidateAmount(value);
+                _amount = value;
+            }
         }
 
         private static void ValidatePrice(double value)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Shops.Tools;
 using Utility.Extensions;
@@ -31,12 +32,12 @@ namespace Shops.Entities
                 Lot? exisingLot = ProductLotOrDefault(lot.Product);
                 if (exisingLot is null)
                 {
-                    _lots.Add(lot.Product.Id, lot);
+                    _lots[lot.Product.Id] = new Lot(lot.Product, lot.Price, lot.Amount);
                 }
                 else
                 {
-                    exisingLot.ChangeAmountBy(lot.Amount);
-                    exisingLot.ProposeNewPrice(lot.Price);
+                    exisingLot.Amount += lot.Amount;
+                    exisingLot.Price = Math.Max(exisingLot.Price, lot.Price);
                 }
             }
 
@@ -61,7 +62,7 @@ namespace Shops.Entities
             double totalPrice = lot.Price * amount;
 
             person.SendBill(totalPrice);
-            lot.ChangeAmountBy(-amount);
+            lot.Amount -= amount;
 
             return this;
         }
@@ -77,30 +78,30 @@ namespace Shops.Entities
             if (lot is null)
                 _lots.Add(product.Id, new Lot(product, price, 0));
             else
-                lot.SetNewPrice(price);
+                lot.Price = price;
 
             return this;
         }
 
-        public bool ProductAvailable(Product product, int amount)
-        {
-            Lot? lot = ProductLotOrDefault(product);
-            return lot is not null && lot.Amount >= amount;
-        }
-
-        public Lot? ProductLotOrDefault(Product product)
-            => _lots.ContainsKey(product.Id) ? _lots[product.Id] : null;
-
-        public Lot ProductLot(Product product)
+        public double ProductPrice(Product product)
         {
             Lot? lot = ProductLotOrDefault(product);
             if (lot is null)
                 throw ShopsExceptionFactory.NonExisingProductException(this, product);
 
-            return lot;
+            return lot.Price;
+        }
+
+        public int ProductAmount(Product product)
+        {
+            Lot? lot = ProductLotOrDefault(product);
+            return lot?.Amount ?? 0;
         }
 
         public override string ToString()
             => $"[{Id}] {Name}";
+
+        private Lot? ProductLotOrDefault(Product product)
+            => _lots.ContainsKey(product.Id) ? _lots[product.Id] : null;
     }
 }
