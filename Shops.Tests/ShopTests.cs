@@ -124,7 +124,7 @@ namespace Shops.Tests
             Assert.Throws<ShopException>(() => _service.BuyCheapest(person, _product, firstCount + secondCount + 1));
             Assert.Throws<ShopException>(() => _service.BuyCheapest(person, _product, firstCount + secondCount));
             Assert.Throws<ShopException>(() => _service.BuyCheapest(person, _product, -1));
-            Assert.Throws<ShopException>(() => _service.BuyCheapest(person, _product, Math.Min(firstCount, secondCount)));
+            Assert.DoesNotThrow(() => _service.BuyCheapest(person, _product, Math.Min(firstCount, secondCount)));
         }
     }
 }
