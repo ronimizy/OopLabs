@@ -34,8 +34,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Banks.Tests", "Banks.Tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utility", "Utility\Utility.csproj", "{9163A24C-178B-4E8E-8936-FF0504ACA8FC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lab 1. Shops.", "Lab 1. Shops.", "{2A166BFE-0B73-4DAC-9523-E2F95F1F4970}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,7 +100,5 @@ Global
 		SolutionGuid = {E4407539-DCCB-468D-85AD-1EA5121A2B54}
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{130AF7B1-D206-4D58-8561-D9EF17A91BAF} = {2A166BFE-0B73-4DAC-9523-E2F95F1F4970}
-		{355C9405-3A4C-4020-A660-32F733B578B5} = {2A166BFE-0B73-4DAC-9523-E2F95F1F4970}
 	EndGlobalSection
 EndGlobal
