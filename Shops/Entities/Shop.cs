@@ -23,22 +23,19 @@ namespace Shops.Entities
         public string Name { get; }
         public string Location { get; }
 
-        public Shop AddProducts(params Lot[] shipment)
+        public Shop AddProduct(Product product, double price, int amount)
         {
-            shipment.ThrowIfNull(nameof(shipment));
+            product.ThrowIfNull(nameof(product));
 
-            foreach (Lot lot in shipment)
+            Lot? lot = ProductLotOrDefault(product);
+            if (lot is null)
             {
-                Lot? exisingLot = ProductLotOrDefault(lot.Product);
-                if (exisingLot is null)
-                {
-                    _lots[lot.Product.Id] = new Lot(lot.Product, lot.Price, lot.Amount);
-                }
-                else
-                {
-                    exisingLot.Amount += lot.Amount;
-                    exisingLot.Price = Math.Max(exisingLot.Price, lot.Price);
-                }
+                _lots[product.Id] = new Lot(product, price, amount);
+            }
+            else
+            {
+                lot.Amount += amount;
+                lot.Price = Math.Max(lot.Price, price);
             }
 
             return this;

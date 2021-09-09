@@ -36,7 +36,7 @@ namespace Shops.Tests
             Assert.NotNull(_shop);
             Assert.NotNull(_product);
 
-            _shop.AddProducts(new Lot(_product, price, amount));
+            _shop.AddProduct(_product, price, amount);
 
             Assert.AreEqual(price, _shop.ProductPrice(_product));
             Assert.AreEqual(amount, _shop.ProductAmount(_product));
@@ -49,8 +49,9 @@ namespace Shops.Tests
             const double secondPrice = 2 * firstPrice;
             const int amount = 10;
 
-            _shop.AddProducts(new Lot(_product, firstPrice, amount))
-                .AddProducts(new Lot(_product, secondPrice, amount));
+            _shop
+                .AddProduct(_product, firstPrice, amount)
+                .AddProduct(_product, secondPrice, amount);
 
             Assert.AreEqual(2 * amount, _shop.ProductAmount(_product));
             Assert.AreEqual(secondPrice, _shop.ProductPrice(_product));
@@ -62,7 +63,8 @@ namespace Shops.Tests
             const int oldPrice = 20;
             const int newPrice = 30;
 
-            _shop.AddProducts(new Lot(_product, oldPrice, 0))
+            _shop
+                .AddProduct(_product, oldPrice, 0)
                 .SetPriceFor(_product, newPrice);
 
             Assert.AreEqual(newPrice, _shop.ProductPrice(_product));
@@ -93,8 +95,9 @@ namespace Shops.Tests
 
             Product expensiveProduct = _service.RegisterProduct("Expensive", "Really expensive");
 
-            _shop.AddProducts(new Lot(_product, smallPrice, largeAmount),
-                              new Lot(expensiveProduct, largePrice, smallAmount));
+            _shop
+                .AddProduct(_product, smallPrice, largeAmount)
+                .AddProduct(expensiveProduct, largePrice, smallAmount);
 
             Assert.Throws<ShopException>(() => _shop.Buy(poorPerson, expensiveProduct, smallAmount));
             Assert.Throws<ShopException>(() => _shop.Buy(richPerson, _product, largeAmount + 1));
@@ -115,13 +118,13 @@ namespace Shops.Tests
             Shop anotherShop = _service.CreateShop("Another Shop", "Another Location");
             var person = new Person("Name", balance);
 
-            _shop.AddProducts(new Lot(_product, firstPrice, firstCount));
-            anotherShop.AddProducts(new Lot(_product, secondPrice, secondCount));
+            _shop.AddProduct(_product, firstPrice, firstCount);
+            anotherShop.AddProduct(_product, secondPrice, secondCount);
 
             Assert.Throws<ShopException>(() => _service.BuyCheapest(person, _product, firstCount + secondCount + 1));
             Assert.Throws<ShopException>(() => _service.BuyCheapest(person, _product, firstCount + secondCount));
             Assert.Throws<ShopException>(() => _service.BuyCheapest(person, _product, -1));
-            _service.BuyCheapest(person, _product, Math.Min(firstCount, secondCount));
+            Assert.Throws<ShopException>(() => _service.BuyCheapest(person, _product, Math.Min(firstCount, secondCount)));
         }
     }
 }
