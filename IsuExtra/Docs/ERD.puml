@@ -1,9 +1,14 @@
 @startuml
 'https://plantuml.com/class-diagram
 
+note "Flags" as Fl
+LessonFrequency . Fl
+
 enum LessonFrequency
 {
-    Odd, Even, Persistent
+    Odd = 1, 
+    Even = 2, 
+    Persistent = 3
 }
 
 class Lesson 
@@ -27,7 +32,7 @@ class Student
     + Group Group
 }
 
-class StudyStream 
+class Stream 
 {
     + Guid Id
     + string Name
@@ -35,30 +40,41 @@ class StudyStream
     + int Capacity
     + List<Student> Students
     --
-    + 
+    + Stream AddStudents(params Student[] students)
 }
 
-class StudySubject 
+class Subject 
 {
     + Guid Id
     + string Name
     + string ShortName
-    + List<StudyStream> Streams
+    + List<Stream> Streams
     --
-    + StudySubject AddStream(int number, Schedule schedule)
+    + Subject AddStream(int number, Schedule schedule, int capacity)
+}
+
+class AdditionalSubjectService
+{
+    - List<Subject> Subjects
+    --
+    + IReadOnlyList<SubjectDto> GetSubjects()
+    + StreamDto GetStream(Guid id)
 }
 
 '
 '
 '
+
 
 Lesson *- LessonFrequency
 
 Schedule ||--{ Lesson
 
-StudyStream ||--{ Student
-StudyStream ||--|| Schedule
+Stream ||--{ Student
+Stream ||--|| Schedule
 
-StudySubject ||--{ StudyStream
+Subject ||--{ Stream
+
+AdditionalSubjectService ||--{ Subject
 
 @enduml
