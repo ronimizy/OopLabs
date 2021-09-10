@@ -32,6 +32,20 @@ class Student
     + Group Group
 }
 
+class Group
+{
+    + Guid Id
+    + string Name
+    + List<Student> Students
+}
+
+class Faculty 
+{
+    + Guid Id
+    + string Name
+    + List<Group> Groups
+}
+
 class Stream 
 {
     + Guid Id
@@ -53,28 +67,37 @@ class Subject
     + Subject AddStream(int number, Schedule schedule, int capacity)
 }
 
+class SubjectFacultyGrouping
+{
+    + Faculty Faculty
+    + List<Subject> Subjects
+}
+
 class AdditionalSubjectService
 {
-    - List<Subject> Subjects
-    --
-    + IReadOnlyList<SubjectDto> GetSubjects()
-    + StreamDto GetStream(Guid id)
+    - List<SubjectFacultyGrouping> Subjects
 }
 
 '
 '
 '
 
-
 Lesson *- LessonFrequency
 
 Schedule ||--{ Lesson
+
+Group ||--{ Student
+
+Faculty ||--{ Group
 
 Stream ||--{ Student
 Stream ||--|| Schedule
 
 Subject ||--{ Stream
 
-AdditionalSubjectService ||--{ Subject
+SubjectFacultyGrouping ||--|| Faculty
+SubjectFacultyGrouping ||--{ Subject
+
+AdditionalSubjectService ||--{ SubjectFacultyGrouping
 
 @enduml
