@@ -27,7 +27,7 @@ namespace Shops.Services
             return new Product(name, description);
         }
 
-        public void BuyCheapest(Person person, Product product, int amount)
+        public Shop FindCheapest(Person person, Product product, int amount)
         {
             person.ThrowIfNull(nameof(person));
             product.ThrowIfNull(nameof(product));
@@ -43,7 +43,7 @@ namespace Shops.Services
             if (shop is null)
                 throw ShopsExceptionFactory.NoShopFoundException(product, amount);
 
-            shop.Buy(person, product, amount);
+            return shop;
         }
     }
 }
