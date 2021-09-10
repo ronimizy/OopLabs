@@ -9,14 +9,14 @@ namespace Shops.Entities
     {
         private static readonly IdGenerator IdGenerator = new ();
 
-        private readonly Dictionary<int, Lot> _lots;
+        private readonly Dictionary<Product, Lot> _lots;
 
         internal Shop(string name, string location)
         {
             Id = IdGenerator.Next();
             Name = name.ThrowIfNull(nameof(name));
             Location = location.ThrowIfNull(nameof(location));
-            _lots = new Dictionary<int, Lot>();
+            _lots = new Dictionary<Product, Lot>();
         }
 
         public int Id { get; }
@@ -30,7 +30,7 @@ namespace Shops.Entities
             Lot? lot = ProductLotOrDefault(product);
             if (lot is null)
             {
-                _lots[product.Id] = new Lot(product, price, amount);
+                _lots[product] = new Lot(price, amount);
             }
             else
             {
@@ -73,7 +73,7 @@ namespace Shops.Entities
 
             Lot? lot = ProductLotOrDefault(product);
             if (lot is null)
-                _lots.Add(product.Id, new Lot(product, price, 0));
+                _lots.Add(product, new Lot(price, 0));
             else
                 lot.Price = price;
 
@@ -99,6 +99,6 @@ namespace Shops.Entities
             => $"[{Id}] {Name}";
 
         private Lot? ProductLotOrDefault(Product product)
-            => _lots.ContainsKey(product.Id) ? _lots[product.Id] : null;
+            => _lots.ContainsKey(product) ? _lots[product] : null;
     }
 }

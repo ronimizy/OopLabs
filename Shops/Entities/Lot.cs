@@ -8,14 +8,11 @@ namespace Shops.Entities
         private double _price;
         private int _amount;
 
-        public Lot(Product product, double price, int amount)
+        public Lot(double price, int amount)
         {
-            Product = product.ThrowIfNull(nameof(product));
             Price = price;
             Amount = amount;
         }
-
-        public Product Product { get; }
 
         public double Price
         {
