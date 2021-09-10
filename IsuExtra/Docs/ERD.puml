@@ -52,7 +52,8 @@ class Stream
     + string Name
     + Schedule Schedule
     + int Capacity
-    + List<Student> Students
+    + List<Student> AssignedStudents
+    + List<Student> BookedStudents
     --
     + Stream AddStudents(params Student[] students)
 }

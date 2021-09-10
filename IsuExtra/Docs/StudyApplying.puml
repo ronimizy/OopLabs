@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+AdditionalSubjectService <- Student: GetAvailableGroupings
+AdditionalSubjectService -> Student: List<SubjectFacultyGroupingDto>
+AdditionalSubjectService <- Student: BookStreamPosition(StreamDto)
+AdditionalSubjectService <- Student: BookStreamPosition(StreamDto)
+AdditionalSubjectService <- Student: ApplyBooking
+
+@enduml
