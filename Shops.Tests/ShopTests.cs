@@ -38,8 +38,8 @@ namespace Shops.Tests
 
             _shop.AddProduct(_product, price, amount);
 
-            Assert.AreEqual(price, _shop.ProductPrice(_product));
-            Assert.AreEqual(amount, _shop.ProductAmount(_product));
+            Assert.AreEqual(price, _shop.GetProductPrice(_product));
+            Assert.AreEqual(amount, _shop.GetProductAmount(_product));
         }
 
         [Test]
@@ -49,12 +49,11 @@ namespace Shops.Tests
             const double secondPrice = 2 * firstPrice;
             const int amount = 10;
 
-            _shop
-                .AddProduct(_product, firstPrice, amount)
-                .AddProduct(_product, secondPrice, amount);
+            _shop.AddProduct(_product, firstPrice, amount);
+            _shop.AddProduct(_product, secondPrice, amount);
 
-            Assert.AreEqual(2 * amount, _shop.ProductAmount(_product));
-            Assert.AreEqual(secondPrice, _shop.ProductPrice(_product));
+            Assert.AreEqual(2 * amount, _shop.GetProductAmount(_product));
+            Assert.AreEqual(secondPrice, _shop.GetProductPrice(_product));
         }
 
         [Test]
@@ -63,11 +62,10 @@ namespace Shops.Tests
             const int oldPrice = 20;
             const int newPrice = 30;
 
-            _shop
-                .AddProduct(_product, oldPrice, 0)
-                .SetPriceFor(_product, newPrice);
+            _shop.AddProduct(_product, oldPrice, 0);
+            _shop.SetProductPrice(_product, newPrice);
 
-            Assert.AreEqual(newPrice, _shop.ProductPrice(_product));
+            Assert.AreEqual(newPrice, _shop.GetProductPrice(_product));
         }
 
         [Test]
@@ -75,9 +73,9 @@ namespace Shops.Tests
         {
             const int newPrice = 30;
 
-            _shop.SetPriceFor(_product, newPrice);
+            _shop.SetProductPrice(_product, newPrice);
 
-            Assert.AreEqual(newPrice, _shop.ProductPrice(_product));
+            Assert.AreEqual(newPrice, _shop.GetProductPrice(_product));
         }
 
         [Test]
@@ -95,9 +93,8 @@ namespace Shops.Tests
 
             Product expensiveProduct = _service.RegisterProduct("Expensive", "Really expensive");
 
-            _shop
-                .AddProduct(_product, smallPrice, largeAmount)
-                .AddProduct(expensiveProduct, largePrice, smallAmount);
+            _shop.AddProduct(_product, smallPrice, largeAmount);
+            _shop.AddProduct(expensiveProduct, largePrice, smallAmount);
 
             Assert.Throws<ShopException>(() => _shop.Buy(poorPerson, expensiveProduct, smallAmount));
             Assert.Throws<ShopException>(() => _shop.Buy(richPerson, _product, largeAmount + 1));

@@ -36,8 +36,8 @@ namespace Shops.Services
                 throw ShopsExceptionFactory.NegativeAmountException(amount);
 
             Shop? shop = _shops
-                .Where(s => s.ProductAmount(product) >= amount)
-                .OrderBy(s => s.ProductPrice(product))
+                .Where(s => s.GetProductAmount(product) >= amount)
+                .OrderBy(s => s.GetProductPrice(product))
                 .FirstOrDefault();
 
             if (shop is null)

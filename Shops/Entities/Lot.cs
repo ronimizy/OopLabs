@@ -1,5 +1,4 @@
 using Shops.Tools;
-using Utility.Extensions;
 
 namespace Shops.Entities
 {
