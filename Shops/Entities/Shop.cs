@@ -7,21 +7,20 @@ namespace Shops.Entities
 {
     public sealed class Shop
     {
-        private static readonly IdGenerator IdGenerator = new ();
-
         private readonly Dictionary<Product, Lot> _lots;
 
         internal Shop(string name, string location)
         {
-            Id = IdGenerator.Next();
+            Id = Guid.NewGuid();
             Name = name.ThrowIfNull(nameof(name));
             Location = location.ThrowIfNull(nameof(location));
             _lots = new Dictionary<Product, Lot>();
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public string Name { get; }
         public string Location { get; }
+        public IReadOnlyCollection<Product> Products => _lots.Keys;
 
         public void AddProduct(Product product, double price, int amount)
         {

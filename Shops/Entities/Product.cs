@@ -1,21 +1,18 @@
 using System;
-using Shops.Tools;
 using Utility.Extensions;
 
 namespace Shops.Entities
 {
     public class Product : IEquatable<Product>
     {
-        private static readonly IdGenerator IdGenerator = new ();
-
         internal Product(string name, string description)
         {
-            Id = IdGenerator.Next();
+            Id = Guid.NewGuid();
             Name = name.ThrowIfNull(nameof(name));
             Description = description.ThrowIfNull(nameof(description));
         }
 
-        public int Id { get; }
+        public Guid Id { get; }
         public string Name { get; }
         public string Description { get; }
 
@@ -26,7 +23,7 @@ namespace Shops.Entities
             => obj is Product other && Equals(other);
 
         public override int GetHashCode()
-            => Id;
+            => Id.GetHashCode();
 
         public override string ToString()
             => $"[{Id}] {Name}";
