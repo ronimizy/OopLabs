@@ -23,8 +23,11 @@ namespace Shops.Tests
         public void Setup()
         {
             _service = new ShopService();
-            _shop = _service.CreateShop(ShopName, ShopLocation);
-            _product = _service.RegisterProduct(ProductName, ProductDescription);
+            _shop = new Shop(ShopName, ShopLocation);
+            _product = new Product(ProductName, ProductDescription);
+            
+            _service.RegisterShop(_shop);
+            _service.RegisterProduct(_product);
         }
 
         [Test]
@@ -36,7 +39,7 @@ namespace Shops.Tests
             Assert.NotNull(_shop);
             Assert.NotNull(_product);
 
-            _shop.AddProduct(_product, price, amount);
+            _shop.SupplyProduct(_product, price, amount);
 
             Assert.AreEqual(price, _shop.GetProductPrice(_product));
             Assert.AreEqual(amount, _shop.GetProductAmount(_product));
@@ -49,8 +52,8 @@ namespace Shops.Tests
             const double secondPrice = 2 * firstPrice;
             const int amount = 10;
 
-            _shop.AddProduct(_product, firstPrice, amount);
-            _shop.AddProduct(_product, secondPrice, amount);
+            _shop.SupplyProduct(_product, firstPrice, amount);
+            _shop.SupplyProduct(_product, secondPrice, amount);
 
             Assert.AreEqual(2 * amount, _shop.GetProductAmount(_product));
             Assert.AreEqual(secondPrice, _shop.GetProductPrice(_product));
@@ -62,7 +65,7 @@ namespace Shops.Tests
             const int oldPrice = 20;
             const int newPrice = 30;
 
-            _shop.AddProduct(_product, oldPrice, 0);
+            _shop.SupplyProduct(_product, oldPrice, 0);
             _shop.SetProductPrice(_product, newPrice);
 
             Assert.AreEqual(newPrice, _shop.GetProductPrice(_product));
@@ -73,9 +76,7 @@ namespace Shops.Tests
         {
             const int newPrice = 30;
 
-            _shop.SetProductPrice(_product, newPrice);
-
-            Assert.AreEqual(newPrice, _shop.GetProductPrice(_product));
+            Assert.Throws<ShopException>(() => _shop.SetProductPrice(_product, newPrice));
         }
 
         [Test]
@@ -91,37 +92,36 @@ namespace Shops.Tests
             var poorPerson = new Person("Poor", poorBalance);
             var richPerson = new Person("Rich", richBalance);
 
-            Product expensiveProduct = _service.RegisterProduct("Expensive", "Really expensive");
+            var expensiveProduct = new Product("Expensive", "Really expensive");
+            _service.RegisterProduct(expensiveProduct);
 
-            _shop.AddProduct(_product, smallPrice, largeAmount);
-            _shop.AddProduct(expensiveProduct, largePrice, smallAmount);
+            _shop.SupplyProduct(_product, smallPrice, largeAmount);
+            _shop.SupplyProduct(expensiveProduct, largePrice, smallAmount);
 
-            Assert.Throws<ShopException>(() => _shop.Buy(poorPerson, expensiveProduct, smallAmount));
-            Assert.Throws<ShopException>(() => _shop.Buy(richPerson, _product, largeAmount + 1));
-            Assert.DoesNotThrow(() => _shop.Buy(richPerson, _product, smallAmount));
+            Assert.Throws<ShopException>(() => _shop.ArrangePurchase(poorPerson, expensiveProduct, smallAmount));
+            Assert.Throws<ShopException>(() => _shop.ArrangePurchase(richPerson, _product, largeAmount + 1));
+            Assert.DoesNotThrow(() => _shop.ArrangePurchase(richPerson, _product, smallAmount));
         }
 
         [Test]
         public void BuyCheapestTest_BoughtNegativeAmount_BoughtMoreItemsThanExists_NotEnoughMoney_ValidPurchase()
         {
-            const int balance = 100;
-
             const int firstPrice = 10;
             const int secondPrice = 20;
 
             const int firstCount = 20;
             const int secondCount = 10;
 
-            Shop anotherShop = _service.CreateShop("Another Shop", "Another Location");
-            var person = new Person("Name", balance);
+            Shop anotherShop = new Shop("Another Shop", "Another Location");
+            _service.RegisterShop(anotherShop);
+            
+            _shop.SupplyProduct(_product, firstPrice, firstCount);
+            anotherShop.SupplyProduct(_product, secondPrice, secondCount);
 
-            _shop.AddProduct(_product, firstPrice, firstCount);
-            anotherShop.AddProduct(_product, secondPrice, secondCount);
-
-            Assert.Throws<ShopException>(() => _service.FindCheapest(person, _product, firstCount + secondCount + 1));
-            Assert.Throws<ShopException>(() => _service.FindCheapest(person, _product, firstCount + secondCount));
-            Assert.Throws<ShopException>(() => _service.FindCheapest(person, _product, -1));
-            Assert.DoesNotThrow(() => _service.FindCheapest(person, _product, Math.Min(firstCount, secondCount)));
+            Assert.Throws<ShopException>(() => _service.FindCheapest(_product, firstCount + secondCount + 1));
+            Assert.Throws<ShopException>(() => _service.FindCheapest(_product, firstCount + secondCount));
+            Assert.Throws<ShopException>(() => _service.FindCheapest(_product, -1));
+            Assert.DoesNotThrow(() => _service.FindCheapest(_product, Math.Min(firstCount, secondCount)));
         }
     }
 }

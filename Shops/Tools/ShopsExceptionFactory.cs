@@ -1,3 +1,4 @@
+using System;
 using Shops.Entities;
 
 namespace Shops.Tools
@@ -18,6 +19,9 @@ namespace Shops.Tools
 
         public static ShopException NonExisingProductException(Shop shop, Product product)
             => new ShopException($"{shop} doesn't have a {product}");
+
+        public static ShopException NonExistingShopException(Guid shopId)
+            => new ShopException($"Shop with id = {shopId} does not exist");
 
         public static ShopException NoShopFoundException(Product product, int amount)
             => new ShopException($"No shop was found containing {product} with amount equal {amount}");

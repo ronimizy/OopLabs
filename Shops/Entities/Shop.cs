@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Shops.Tools;
 using Utility.Extensions;
 
@@ -9,7 +10,7 @@ namespace Shops.Entities
     {
         private readonly Dictionary<Product, Lot> _lots;
 
-        internal Shop(string name, string location)
+        public Shop(string name, string location)
         {
             Id = Guid.NewGuid();
             Name = name.ThrowIfNull(nameof(name));
@@ -20,11 +21,17 @@ namespace Shops.Entities
         public Guid Id { get; }
         public string Name { get; }
         public string Location { get; }
-        public IReadOnlyCollection<Product> Products => _lots.Keys;
+        public IReadOnlyList<Product> Products => _lots.Keys.ToList();
 
-        public void AddProduct(Product product, double price, int amount)
+        public void SupplyProduct(Product product, double price, int amount)
         {
             product.ThrowIfNull(nameof(product));
+
+            if (price < 0)
+                throw ShopsExceptionFactory.NegativePriceException(price);
+
+            if (amount < 0)
+                throw ShopsExceptionFactory.NegativeAmountException(amount);
 
             Lot? lot = GetProductLotOrDefault(product);
             if (lot is null)
@@ -38,7 +45,7 @@ namespace Shops.Entities
             }
         }
 
-        public void Buy(Person person, Product product, int amount)
+        public void ArrangePurchase(Person person, Product product, int amount)
         {
             person.ThrowIfNull(nameof(person));
             product.ThrowIfNull(nameof(product));
@@ -68,9 +75,9 @@ namespace Shops.Entities
 
             Lot? lot = GetProductLotOrDefault(product);
             if (lot is null)
-                _lots.Add(product, new Lot(price, 0));
-            else
-                lot.Price = price;
+                throw ShopsExceptionFactory.NonExisingProductException(this, product);
+
+            lot.Price = price;
         }
 
         public double GetProductPrice(Product product)
@@ -92,6 +99,6 @@ namespace Shops.Entities
             => $"[{Id}] {Name}";
 
         private Lot? GetProductLotOrDefault(Product product)
-            => _lots.ContainsKey(product) ? _lots[product] : null;
+            => _lots.TryGetValue(product, out var lot) ? lot : null;
     }
 }

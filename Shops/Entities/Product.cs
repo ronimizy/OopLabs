@@ -5,7 +5,7 @@ namespace Shops.Entities
 {
     public class Product : IEquatable<Product>
     {
-        internal Product(string name, string description)
+        public Product(string name, string description)
         {
             Id = Guid.NewGuid();
             Name = name.ThrowIfNull(nameof(name));

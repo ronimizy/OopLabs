@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Shops.Entities;
@@ -8,34 +9,44 @@ namespace Shops.Services
 {
     public class ShopService
     {
-        private readonly List<Shop> _shops;
+        private readonly Dictionary<Guid, Shop> _shops;
+        private readonly Dictionary<Guid, Product> _products;
 
         public ShopService()
         {
-            _shops = new List<Shop>();
+            _shops = new Dictionary<Guid, Shop>();
+            _products = new Dictionary<Guid, Product>();
         }
 
-        public Shop CreateShop(string name, string location)
+        public IReadOnlyList<Shop> Shops => _shops.Values.ToList();
+        public IReadOnlyList<Product> Products => _products.Values.ToList();
+
+        public void RegisterShop(Shop shop)
         {
-            var shop = new Shop(name, location);
-            _shops.Add(shop);
-            return shop;
+            _shops[shop.Id] = shop;
         }
 
-        public Product RegisterProduct(string name, string description)
+        public Shop GetShop(Guid id)
         {
-            return new Product(name, description);
+            if (!_shops.ContainsKey(id))
+                throw ShopsExceptionFactory.NonExistingShopException(id);
+
+            return _shops[id];
         }
 
-        public Shop FindCheapest(Person person, Product product, int amount)
+        public void RegisterProduct(Product product)
         {
-            person.ThrowIfNull(nameof(person));
+            _products[product.Id] = product;
+        }
+
+        public Shop FindCheapest(Product product, int amount)
+        {
             product.ThrowIfNull(nameof(product));
 
             if (amount < 0)
                 throw ShopsExceptionFactory.NegativeAmountException(amount);
 
-            Shop? shop = _shops
+            Shop? shop = _shops.Values
                 .Where(s => s.GetProductAmount(product) >= amount)
                 .OrderBy(s => s.GetProductPrice(product))
                 .FirstOrDefault();
