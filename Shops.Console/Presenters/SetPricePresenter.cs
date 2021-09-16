@@ -1,19 +1,19 @@
 using System;
-using Shops.Console.Base.ViewControllers;
+using Shops.Console.Base.Presenters;
 using Shops.Console.Delegates;
 using Shops.Console.Views;
 using Shops.Entities;
 using Utility.Extensions;
 
-namespace Shops.Console.ViewControllers
+namespace Shops.Console.Presenters
 {
-    public class SetPriceController : Controller
+    public class SetPricePresenter : Presenter
     {
         private readonly Shop _shop;
         private Product? _product;
         private double _price;
 
-        public SetPriceController(Shop shop)
+        public SetPricePresenter(Shop shop)
         {
             _shop = shop;
 
@@ -22,7 +22,7 @@ namespace Shops.Console.ViewControllers
 
             View = new SetPriceView(productSelectorDelegate, priceInputFieldDelegate)
             {
-                Controller = this,
+                Presenter = this,
             };
         }
 

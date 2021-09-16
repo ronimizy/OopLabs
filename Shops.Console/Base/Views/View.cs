@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Shops.Console.Base.ViewControllers;
+using Shops.Console.Base.Presenters;
 
 namespace Shops.Console.Base.Views
 {
@@ -7,7 +7,7 @@ namespace Shops.Console.Base.Views
     {
         private readonly List<View> _subviews = new();
 
-        public Controller? Controller { get; set; }
+        public Presenter? Presenter { get; set; }
 
         public void Render()
         {
@@ -18,7 +18,7 @@ namespace Shops.Console.Base.Views
                 subview.Render();
             }
 
-            Controller?.OnViewRendered();
+            Presenter?.OnViewRendered();
         }
 
         protected virtual void RenderBody() { }

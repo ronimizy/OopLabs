@@ -1,10 +1,10 @@
 using Shops.Console.Base.Views;
 
-namespace Shops.Console.Base.ViewControllers
+namespace Shops.Console.Base.Presenters
 {
-    public class ErrorController : NavigatedController
+    public class ErrorPresenter : NavigatedPresenter
     {
-        public ErrorController(string message)
+        public ErrorPresenter(string message)
         {
             View = new ErrorView(message);
         }

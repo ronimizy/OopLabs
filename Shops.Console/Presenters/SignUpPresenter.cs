@@ -1,19 +1,19 @@
 using System;
-using Shops.Console.Base.ViewControllers;
+using Shops.Console.Base.Presenters;
 using Shops.Console.Delegates;
 using Shops.Console.Views;
 using Shops.Entities;
 using Shops.Services;
 
-namespace Shops.Console.ViewControllers
+namespace Shops.Console.Presenters
 {
-    public class SignUpController : Controller
+    public class SignUpPresenter : Presenter
     {
         private readonly ShopService _service;
         private string? _username;
         private int? _balance;
 
-        public SignUpController(ShopService service)
+        public SignUpPresenter(ShopService service)
         {
             _service = service;
 
@@ -22,7 +22,7 @@ namespace Shops.Console.ViewControllers
 
             View = new SignUpView(usernameDelegate, balanceDelegate)
             {
-                Controller = this,
+                Presenter = this,
             };
         }
 
@@ -42,7 +42,7 @@ namespace Shops.Console.ViewControllers
                 return;
             }
 
-            Parent?.AddChild(new MenuController(_service, new Person(_username, _balance.Value)));
+            Parent?.AddChild(new MenuPresenter(_service, new Person(_username, _balance.Value)));
         }
     }
 }

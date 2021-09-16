@@ -1,21 +1,21 @@
 using Shops.Console.Base.Delegates;
 using Shops.Console.Base.Models;
-using Shops.Console.Base.ViewControllers;
+using Shops.Console.Base.Presenters;
 using Spectre.Console;
 
 namespace Shops.Console.Base.Views
 {
     public class NavigationView : View
     {
-        public NavigationView(Controller controller, ISelectorViewDelegate<SelectorAction> selectorViewDelegate)
+        public NavigationView(Presenter presenter, ISelectorViewDelegate<SelectorAction> selectorViewDelegate)
         {
-            var title = new Markup($"[bold]{controller.Title}[/]\n") { Alignment = Justify.Left };
+            var title = new Markup($"[bold]{presenter.Title}[/]\n") { Alignment = Justify.Left };
             AddSubview(new MarkupView(title));
 
-            if (controller.View != null)
-                AddSubview(controller.View);
+            if (presenter.View != null)
+                AddSubview(presenter.View);
 
-            if (controller is not NavigatedController)
+            if (presenter is not NavigatedPresenter)
                 return;
 
             AddSubview(new MarkupView(new Markup("\n")));

@@ -1,20 +1,20 @@
 using System;
-using Shops.Console.Base.ViewControllers;
+using Shops.Console.Base.Presenters;
 using Shops.Console.Delegates;
 using Shops.Console.Views;
 using Shops.Entities;
 using Utility.Extensions;
 
-namespace Shops.Console.ViewControllers
+namespace Shops.Console.Presenters
 {
-    public class BuyProductController : Controller
+    public class BuyProductPresenter : Presenter
     {
         private readonly Shop _shop;
         private readonly Person _user;
         private Product? _product;
         private int? _amount;
 
-        public BuyProductController(Person user, Shop shop)
+        public BuyProductPresenter(Person user, Shop shop)
         {
             _user = user;
             _shop = shop;
@@ -24,7 +24,7 @@ namespace Shops.Console.ViewControllers
 
             View = new BuyProductView(selectProductDelegate, inputDelegate)
             {
-                Controller = this,
+                Presenter = this,
             };
         }
 

@@ -2,19 +2,19 @@ using System;
 using System.Collections.Generic;
 using Shops.Console.Base.Delegates;
 using Shops.Console.Base.Models;
-using Shops.Console.Base.ViewControllers;
+using Shops.Console.Base.Presenters;
 using Shops.Console.Base.Views;
 using Shops.Entities;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
-namespace Shops.Console.ViewControllers
+namespace Shops.Console.Presenters
 {
-    public class ProductListController : NavigatedController, ITableViewDelegate
+    public class ProductListPresenter : NavigatedPresenter, ITableViewDelegate
     {
         private readonly IReadOnlyList<Product> _products;
 
-        public ProductListController(IReadOnlyList<Product> products)
+        public ProductListPresenter(IReadOnlyList<Product> products)
         {
             _products = products;
 

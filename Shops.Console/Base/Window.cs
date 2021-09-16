@@ -1,16 +1,16 @@
 using System.Threading;
-using Shops.Console.Base.ViewControllers;
+using Shops.Console.Base.Presenters;
 using Spectre.Console;
 
 namespace Shops.Console.Base
 {
     public class Window
     {
-        private readonly Controller _rootController;
+        private readonly Presenter _rootPresenter;
 
-        public Window(Controller rootController)
+        public Window(Presenter rootPresenter)
         {
-            _rootController = rootController;
+            _rootPresenter = rootPresenter;
         }
 
         public bool Running { get; set; } = true;
@@ -21,7 +21,7 @@ namespace Shops.Console.Base
             while (Running)
             {
                 AnsiConsole.Clear();
-                _rootController.View?.Render();
+                _rootPresenter.View?.Render();
 
                 Thread.Sleep(delay);
             }

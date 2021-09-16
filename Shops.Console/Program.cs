@@ -1,6 +1,6 @@
 using Shops.Console.Base;
-using Shops.Console.Base.ViewControllers;
-using Shops.Console.ViewControllers;
+using Shops.Console.Base.Presenters;
+using Shops.Console.Presenters;
 using Shops.Entities;
 using Shops.Services;
 
@@ -20,9 +20,9 @@ namespace Shops.Console
 
             shop.SupplyProduct(product, 2, 100);
 
-            var signupViewController = new SignUpController(service);
-            var navigationController = new NavigationController(signupViewController);
-            var window = new Window(navigationController);
+            var signUpPresenter = new SignUpPresenter(service);
+            var navigationPresenter = new NavigationPresenter(signUpPresenter);
+            var window = new Window(navigationPresenter);
 
             window.Run(10);
         }

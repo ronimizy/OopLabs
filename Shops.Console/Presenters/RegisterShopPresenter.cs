@@ -2,21 +2,21 @@ using System;
 using System.Collections.Generic;
 using Shops.Console.Base.Delegates;
 using Shops.Console.Base.Models;
-using Shops.Console.Base.ViewControllers;
+using Shops.Console.Base.Presenters;
 using Shops.Console.Delegates;
 using Shops.Console.Views;
 using Shops.Entities;
 using Utility.Extensions;
 
-namespace Shops.Console.ViewControllers
+namespace Shops.Console.Presenters
 {
-    public class RegisterShopController : Controller, ISelectorViewDelegate<SelectorAction>
+    public class RegisterShopPresenter : Presenter, ISelectorViewDelegate<SelectorAction>
     {
         private readonly Action<Shop> _completion;
         private string? _shopName;
         private string? _shopLocation;
 
-        public RegisterShopController(Action<Shop> completion)
+        public RegisterShopPresenter(Action<Shop> completion)
         {
             _completion = completion;
 

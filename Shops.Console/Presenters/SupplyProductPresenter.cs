@@ -1,21 +1,21 @@
 using System;
 using System.Collections.Generic;
-using Shops.Console.Base.ViewControllers;
+using Shops.Console.Base.Presenters;
 using Shops.Console.Delegates;
 using Shops.Console.Views;
 using Shops.Entities;
 using Utility.Extensions;
 
-namespace Shops.Console.ViewControllers
+namespace Shops.Console.Presenters
 {
-    public class SupplyProductController : Controller
+    public class SupplyProductPresenter : Presenter
     {
         private readonly Shop _shop;
         private Product? _product;
         private double? _price;
         private int? _amount;
 
-        public SupplyProductController(Shop shop, IReadOnlyList<Product> products)
+        public SupplyProductPresenter(Shop shop, IReadOnlyList<Product> products)
         {
             _shop = shop;
 
@@ -25,7 +25,7 @@ namespace Shops.Console.ViewControllers
 
             View = new SupplyProductView(productViewDelegate, priceInputDelegate, amountInputDelegate)
             {
-                Controller = this,
+                Presenter = this,
             };
         }
 
