@@ -2,11 +2,11 @@ using Shops.Console.Base.Views;
 
 namespace Shops.Console.Base.ViewControllers
 {
-    public class ErrorViewController : NavigatedViewController
+    public class ErrorController : NavigatedController
     {
-        public ErrorViewController(string message)
+        public ErrorController(string message)
         {
-            AddView(new ErrorView(message));
+            View = new ErrorView(message);
         }
 
         public override string Title => "Error";

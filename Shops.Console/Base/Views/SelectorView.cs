@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Shops.Console.Base.Delegates;
 using Spectre.Console;
 
@@ -13,10 +14,14 @@ namespace Shops.Console.Base.Views
             _delegate = @delegate;
         }
 
-        public override void DrawBody()
+        protected override void RenderBody()
         {
+            IReadOnlyList<T> choices = _delegate.GetChoices();
+            if (choices.Count == 0)
+                return;
+
             SelectionPrompt<T> prompt = new SelectionPrompt<T>()
-                .AddChoices(_delegate.GetChoices());
+                .AddChoices(choices);
 
             T input = AnsiConsole.Prompt(prompt);
             _delegate.ProcessInput(input);

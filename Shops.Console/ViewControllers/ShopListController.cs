@@ -6,25 +6,25 @@ using Shops.Entities;
 
 namespace Shops.Console.ViewControllers
 {
-    public class ShopListViewController : NavigatedViewController
+    public class ShopListController : NavigatedController
     {
         private readonly Person _user;
         private readonly IReadOnlyCollection<Shop> _shops;
         private readonly IReadOnlyList<Product> _products;
 
-        public ShopListViewController(Person user, IReadOnlyCollection<Shop> shops, IReadOnlyList<Product> products)
+        public ShopListController(Person user, IReadOnlyCollection<Shop> shops, IReadOnlyList<Product> products)
         {
             _user = user;
             _shops = shops;
             _products = products;
 
-            AddView(new UserDetailsView(user));
+            View = new UserDetailsView(user);
         }
 
         public override string Title => "Shop List";
 
-        public override IReadOnlyList<ViewController> NavigationLinks => _shops
-            .Select(s => new ShopViewController(_user, s, _products))
+        public override IReadOnlyList<Controller> NavigationLinks => _shops
+            .Select(s => new ShopController(_user, s, _products))
             .ToList();
     }
 }

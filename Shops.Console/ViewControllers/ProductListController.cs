@@ -10,15 +10,15 @@ using Spectre.Console.Rendering;
 
 namespace Shops.Console.ViewControllers
 {
-    public class ProductListViewController : NavigatedViewController, ITableViewDelegate
+    public class ProductListController : NavigatedController, ITableViewDelegate
     {
         private readonly IReadOnlyList<Product> _products;
 
-        public ProductListViewController(IReadOnlyList<Product> products)
+        public ProductListController(IReadOnlyList<Product> products)
         {
             _products = products;
 
-            AddView(new TableView(this));
+            View = new TableView(this);
         }
 
         public override string Title => "Product List";

@@ -4,7 +4,6 @@ using System.Globalization;
 using Shops.Console.Base.Delegates;
 using Shops.Console.Base.Models;
 using Shops.Console.Base.ViewControllers;
-using Shops.Console.Base.Views;
 using Shops.Console.Views;
 using Shops.Entities;
 using Spectre.Console;
@@ -12,36 +11,36 @@ using Spectre.Console.Rendering;
 
 namespace Shops.Console.ViewControllers
 {
-    public class ShopViewController : NavigatedViewController, ITableViewDelegate
+    public class ShopController : NavigatedController, ITableViewDelegate
     {
         private readonly Person _user;
         private readonly Shop _shop;
         private readonly IReadOnlyList<Product> _products;
 
-        public ShopViewController(Person user, Shop shop, IReadOnlyList<Product> products)
+        public ShopController(Person user, Shop shop, IReadOnlyList<Product> products)
         {
             _shop = shop;
             _products = products;
             _user = user;
 
-            AddView(new UserDetailsView(user));
-            AddView(new TableView(this));
+            View = new ShopView(user, this);
         }
 
         public override string Title => _shop.Name;
-        public override IReadOnlyList<ViewController> NavigationLinks
+
+        public override IReadOnlyList<Controller> NavigationLinks
         {
             get
             {
-                var links = new List<ViewController>();
+                var links = new List<Controller>();
 
                 if (_products.Count > 0)
-                    links.Add(new SupplyProductViewController(_shop, _products));
+                    links.Add(new SupplyProductController(_shop, _products));
 
                 if (_shop.Products.Count > 0)
                 {
-                    links.Add(new BuyProductViewController(_user, _shop));
-                    links.Add(new SetPriceViewController(_shop));
+                    links.Add(new BuyProductController(_user, _shop));
+                    links.Add(new SetPriceController(_shop));
                 }
 
                 return links;

@@ -11,9 +11,9 @@ namespace Shops.Console.Base.Views
             _message = message;
         }
 
-        public override void DrawBody()
+        protected override void RenderBody()
         {
-            AnsiConsole.Markup("[bold red]{0}[/]", Markup.Escape(_message));
+            AnsiConsole.Markup("[bold red]{0}[/]\n", Markup.Escape(_message));
         }
     }
 }

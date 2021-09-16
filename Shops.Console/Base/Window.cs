@@ -6,13 +6,11 @@ namespace Shops.Console.Base
 {
     public class Window
     {
-        private readonly ViewController _rootViewController;
-        private bool _needsRedrawing = true;
+        private readonly Controller _rootController;
 
-        public Window(ViewController rootViewController)
+        public Window(Controller rootController)
         {
-            _rootViewController = rootViewController;
-            _rootViewController.Redraw += Redraw;
+            _rootController = rootController;
         }
 
         public bool Running { get; set; } = true;
@@ -22,20 +20,11 @@ namespace Shops.Console.Base
             int delay = 1000 / fps;
             while (Running)
             {
-                if (_needsRedrawing)
-                {
-                    _needsRedrawing = false;
-                    AnsiConsole.Clear();
-                    _rootViewController.DrawContent();
-                }
+                AnsiConsole.Clear();
+                _rootController.View?.Render();
 
                 Thread.Sleep(delay);
             }
-        }
-
-        private void Redraw(ViewController target)
-        {
-            _needsRedrawing = true;
         }
     }
 }

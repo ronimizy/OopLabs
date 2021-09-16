@@ -26,14 +26,6 @@ namespace Shops.Services
             _shops[shop.Id] = shop;
         }
 
-        public Shop GetShop(Guid id)
-        {
-            if (!_shops.ContainsKey(id))
-                throw ShopsExceptionFactory.NonExistingShopException(id);
-
-            return _shops[id];
-        }
-
         public void RegisterProduct(Product product)
         {
             _products[product.Id] = product;

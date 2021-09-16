@@ -1,6 +1,6 @@
 using System;
 
-namespace Shops.Console.Models
+namespace Shops.Console.Base.Models
 {
     public record SelectorAction(string Title, Action Action)
     {

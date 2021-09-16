@@ -6,24 +6,15 @@ namespace Shops.Console.Views
 {
     public class UserDetailsView : View
     {
-        private readonly Person _user;
-
         public UserDetailsView(Person user)
         {
-            _user = user;
-        }
-
-        public override void DrawBody()
-        {
-            string message = $"{_user.Name} - {_user.Balance}$";
-
-            var balanceLabel = new Text(message)
+            string message = $"{user.Name} - {user.Balance}$\n";
+            var markup = new Markup(message)
             {
                 Alignment = Justify.Left,
             };
 
-            AnsiConsole.Render(balanceLabel);
-            AnsiConsole.WriteLine();
+            AddSubview(new MarkupView(markup));
         }
     }
 }

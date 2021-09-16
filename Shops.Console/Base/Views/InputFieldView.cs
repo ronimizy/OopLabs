@@ -14,7 +14,7 @@ namespace Shops.Console.Base.Views
             _delegate = @delegate;
         }
 
-        public override void DrawBody()
+        protected override void RenderBody()
         {
             TextPrompt<T> prompt = new TextPrompt<T>(_question) { AllowEmpty = _delegate.IsOptional() }
                 .Validate(_delegate.Validate);

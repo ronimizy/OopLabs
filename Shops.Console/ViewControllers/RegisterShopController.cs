@@ -1,33 +1,29 @@
 using System;
 using System.Collections.Generic;
 using Shops.Console.Base.Delegates;
+using Shops.Console.Base.Models;
 using Shops.Console.Base.ViewControllers;
-using Shops.Console.Base.Views;
 using Shops.Console.Delegates;
-using Shops.Console.Models;
+using Shops.Console.Views;
 using Shops.Entities;
 using Utility.Extensions;
 
 namespace Shops.Console.ViewControllers
 {
-    public class RegisterShopViewController : ViewController, ISelectorViewDelegate<SelectorAction>
+    public class RegisterShopController : Controller, ISelectorViewDelegate<SelectorAction>
     {
         private readonly Action<Shop> _completion;
         private string? _shopName;
         private string? _shopLocation;
 
-        public RegisterShopViewController(Action<Shop> completion)
+        public RegisterShopController(Action<Shop> completion)
         {
             _completion = completion;
 
-            AddView(new InputFieldView<string>(
-                                "Name: ",
-                                new StrategyInputFieldDelegate<string>(v => _shopName = v)));
-            AddView(new InputFieldView<string>(
-                                "Location: ",
-                                new StrategyInputFieldDelegate<string>(v => _shopLocation = v)));
+            var nameInputFieldDelegate = new StrategyInputFieldDelegate<string>(v => _shopName = v);
+            var locationInputFieldDelegate = new StrategyInputFieldDelegate<string>(v => _shopLocation = v);
 
-            AddView(new SelectorView<SelectorAction>(this));
+            View = new RegisterShopView(nameInputFieldDelegate, locationInputFieldDelegate, this);
         }
 
         public override string Title => "Shop Registration";
@@ -41,9 +37,9 @@ namespace Shops.Console.ViewControllers
                     _completion(new Shop(
                                     _shopName.ThrowIfNull(nameof(_shopName)),
                                     _shopLocation.ThrowIfNull(nameof(_shopLocation))));
-                    OnDismiss(this);
+                    Parent?.RemoveChild(this);
                 }),
-                new SelectorAction("Discard", () => OnDismiss(this)),
+                new SelectorAction("Discard", () => Parent?.RemoveChild(this)),
             };
 
             return actions;

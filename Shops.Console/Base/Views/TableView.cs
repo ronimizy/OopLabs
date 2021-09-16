@@ -14,7 +14,7 @@ namespace Shops.Console.Base.Views
             _delegate = @delegate;
         }
 
-        public override void DrawBody()
+        protected override void RenderBody()
         {
             Table table = new Table
             {
