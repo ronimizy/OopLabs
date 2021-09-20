@@ -1,12 +1,13 @@
-using Shops.Console.Base;
-using Shops.Console.Base.Presenters;
-using Shops.Console.Presenters;
+﻿using Shops.Console.Base;
+using Shops.Console.Base.Views;
+using Shops.Console.ViewModels;
+using Shops.Console.Views;
 using Shops.Entities;
 using Shops.Services;
 
 namespace Shops.Console
 {
-    public class Program
+    internal class Program
     {
         public static void Main(string[] args)
         {
@@ -20,9 +21,8 @@ namespace Shops.Console
 
             shop.SupplyProduct(product, 2, 100);
 
-            var signUpPresenter = new SignUpPresenter(service);
-            var navigationPresenter = new NavigationPresenter(signUpPresenter);
-            var window = new Window(navigationPresenter);
+            var navigationView = new NavigationView(n => new SignUpView(new SignUpViewModel(service, n)));
+            var window = new Window(navigationView);
 
             window.Run(10);
         }

@@ -3,35 +3,36 @@ using Shops.Console.Base.Components;
 using Shops.Console.Base.Views;
 using Shops.Console.Components;
 using Shops.Console.ViewModels;
+using Shops.Entities;
 
 namespace Shops.Console.Views
 {
-    public class RegisterProductView : View
+    public class SetProductPriceView : View
     {
-        private readonly RegisterProductViewModel _viewModel;
+        private readonly SetProductPriceViewModel _viewModel;
 
-        public RegisterProductView(RegisterProductViewModel viewModel)
+        public SetProductPriceView(SetProductPriceViewModel viewModel)
         {
             _viewModel = viewModel;
         }
 
-        public override string Title => "Register Product";
+        public override string Title => "Set Product Price";
 
         protected override IReadOnlyCollection<Component> GetComponents()
         {
-            var nameInput = new InputComponent<string>("Name: ");
-            nameInput.ValueSubmitted += _viewModel.OnNameEntered;
+            var productSelector = new SelectorComponent<Product>("Select a product", _viewModel.Products);
+            productSelector.ValueChanged += _viewModel.OnProductSelected;
 
-            var descriptionInput = new InputComponent<string>("Description: ", optional: true);
-            descriptionInput.ValueSubmitted += _viewModel.OnDescriptionEntered;
+            var amountInput = new InputComponent<double>("Price: ", v => v >= 0);
+            amountInput.ValueSubmitted += _viewModel.OnPriceEntered;
 
             var submitSelector = new ConfirmationComponent(_viewModel.OnOperationConfirmed, _viewModel.OnOperationRejected);
             submitSelector.ValueChanged += _viewModel.OnConfirmationChoiceReceived;
 
             return new Component[]
             {
-                nameInput,
-                descriptionInput,
+                productSelector,
+                amountInput,
                 submitSelector,
             };
         }

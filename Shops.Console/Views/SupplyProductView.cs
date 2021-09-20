@@ -1,19 +1,43 @@
-using Shops.Console.Base.Delegates;
-using Shops.Console.Base.Models;
+using System.Collections.Generic;
+using Shops.Console.Base.Components;
 using Shops.Console.Base.Views;
+using Shops.Console.Components;
+using Shops.Console.ViewModels;
 
 namespace Shops.Console.Views
 {
     public class SupplyProductView : View
     {
-        public SupplyProductView(
-            ISelectorViewDelegate<SelectorAction> productViewDelegate,
-            IInputFieldDelegate<double> priceInputDelegate,
-            IInputFieldDelegate<int> amountInputDelegate)
+        private readonly SupplyProductViewModel _viewModel;
+
+        public SupplyProductView(SupplyProductViewModel viewModel)
         {
-            AddSubview(new SelectorView<SelectorAction>(productViewDelegate));
-            AddSubview(new InputFieldView<double>("Price: ", priceInputDelegate));
-            AddSubview(new InputFieldView<int>("Amount: ", amountInputDelegate));
+            _viewModel = viewModel;
+        }
+
+        public override string Title => "Supply Products";
+
+        protected override IReadOnlyCollection<Component> GetComponents()
+        {
+            var productSelector = new ProductSelectorComponent(_viewModel.Products);
+            productSelector.ValueChanged += _viewModel.OnProductSelected;
+
+            var priceInput = new InputComponent<double>("Price: ", v => v >= 0);
+            priceInput.ValueSubmitted += _viewModel.OnPriceEntered;
+
+            var amountInput = new InputComponent<int>("Amount: ", v => v >= 0);
+            amountInput.ValueSubmitted += _viewModel.OnAmountEntered;
+
+            var submitSelector = new ConfirmationComponent(_viewModel.OnOperationConfirmed, _viewModel.OnOperationRejected);
+            submitSelector.ValueChanged += _viewModel.OnConfirmationChoiceReceived;
+
+            return new Component[]
+            {
+                productSelector,
+                priceInput,
+                amountInput,
+                submitSelector,
+            };
         }
     }
 }

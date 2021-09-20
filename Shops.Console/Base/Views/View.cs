@@ -1,29 +1,22 @@
+using System;
 using System.Collections.Generic;
-using Shops.Console.Base.Presenters;
+using Shops.Console.Base.Components;
 
 namespace Shops.Console.Base.Views
 {
     public abstract class View
     {
-        private readonly List<View> _subviews = new();
+        public abstract string Title { get; }
 
-        public Presenter? Presenter { get; set; }
-
-        public void Render()
+        public virtual void Draw()
         {
-            RenderBody();
-
-            foreach (View subview in _subviews)
+            foreach (Component component in GetComponents())
             {
-                subview.Render();
+                component.Draw();
             }
-
-            Presenter?.OnViewRendered();
         }
 
-        protected virtual void RenderBody() { }
-
-        protected void AddSubview(View subview)
-            => _subviews.Add(subview);
+        protected virtual IReadOnlyCollection<Component> GetComponents()
+            => Array.Empty<Component>();
     }
 }

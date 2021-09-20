@@ -1,19 +1,29 @@
+using System;
+using System.Collections.Generic;
+using Shops.Console.Base.Components;
+using Shops.Console.Base.Interfaces;
 using Spectre.Console;
 
 namespace Shops.Console.Base.Views
 {
     public class ErrorView : View
     {
-        private readonly string _message;
+        private readonly Exception _error;
+        private readonly INavigator _navigator;
 
-        public ErrorView(string message)
+        public ErrorView(Exception error, INavigator navigator)
         {
-            _message = message;
+            _error = error;
+            _navigator = navigator;
         }
 
-        protected override void RenderBody()
-        {
-            AnsiConsole.Markup("[bold red]{0}[/]\n", Markup.Escape(_message));
-        }
+        public override string Title => "Error";
+
+        protected override IReadOnlyCollection<Component> GetComponents()
+            => new Component[]
+            {
+                new MarkupComponent(new Markup($"[bold]{_error.Message.EscapeMarkup()}[/]\n")),
+                new ButtonComponent("Ok", _navigator.PopView),
+            };
     }
 }

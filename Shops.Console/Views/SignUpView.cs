@@ -1,14 +1,37 @@
-using Shops.Console.Base.Delegates;
+using System.Collections.Generic;
+using Shops.Console.Base.Components;
 using Shops.Console.Base.Views;
+using Shops.Console.ViewModels;
 
 namespace Shops.Console.Views
 {
     public class SignUpView : View
     {
-        public SignUpView(IInputFieldDelegate<string> usernameDelegate, IInputFieldDelegate<int> balanceDelegate)
+        private readonly SignUpViewModel _viewModel;
+
+        public SignUpView(SignUpViewModel viewModel)
         {
-            AddSubview(new InputFieldView<string>("Username: ", usernameDelegate));
-            AddSubview(new InputFieldView<int>("Balance: ", balanceDelegate));
+            _viewModel = viewModel;
+        }
+
+        public override string Title => "Sign Up";
+
+        protected override IReadOnlyCollection<Component> GetComponents()
+        {
+            var usernameInput = new InputComponent<string>("Username: ");
+            usernameInput.ValueSubmitted += _viewModel.OnUsernameEntered;
+
+            var balanceInput = new InputComponent<double>("Balance: ", v => v >= 0);
+            balanceInput.ValueSubmitted += _viewModel.OnBalanceEntered;
+
+            var buttonComponent = new ButtonComponent("Proceed", _viewModel.OnProceed);
+
+            return new Component[]
+            {
+                usernameInput,
+                balanceInput,
+                buttonComponent,
+            };
         }
     }
 }
