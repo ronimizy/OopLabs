@@ -5,7 +5,7 @@ namespace Utility.Extensions
     public static class GenericExtension
     {
         public static TValue ThrowIfNull<TValue, TException>(this TValue? value, TException exception)
-            where TException : Exception
+            where TException: Exception
         {
             if (value is null)
                 throw exception;
@@ -16,8 +16,17 @@ namespace Utility.Extensions
         public static TValue ThrowIfNull<TValue>(this TValue? value, string argumentName)
             => value.ThrowIfNull(new ArgumentNullException(argumentName));
 
-        public static TValue ThrowIfNull<TValue, TException>(this TValue? value)
-            where TException : Exception, new()
-            => value.ThrowIfNull(new TException());
+        public static TValue ThrowIfNull<TValue, TException>(this TValue? value, TException exception)
+            where TException: Exception
+            where TValue: struct
+        {
+            if (value is null)
+                throw exception;
+
+            return value.Value;
+        }
+
+        public static TValue ThrowIfNull<TValue>(this TValue? value, string argumentName) where TValue: struct
+            => value.ThrowIfNull(new ArgumentException(argumentName));
     }
 }
