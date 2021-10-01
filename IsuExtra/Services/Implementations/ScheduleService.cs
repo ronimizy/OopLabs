@@ -29,7 +29,11 @@ namespace IsuExtra.Services.Implementations
         {
             subject.ThrowIfNull(nameof(subject));
 
-            if (!_isuService.FindFaculty(subject.Course.Faculty.Letter)?.Equals(subject.Course.Faculty) ?? true)
+            Faculty faculty = _isuService
+                .FindFaculty(subject.Course.Faculty.Letter)
+                .ThrowIfNull(ScheduleServiceExceptionFactory.NotRegisteredFaculty(subject.Course.Faculty));
+
+            if (faculty.Equals(subject.Course.Faculty))
                 throw ScheduleServiceExceptionFactory.UnknownCourse(subject.Course);
 
             if (_subjects.Contains(subject))
@@ -144,7 +148,8 @@ namespace IsuExtra.Services.Implementations
 
         public IReadOnlyCollection<Student> GetNotSignedUpStudents(GroupName groupName)
         {
-            Group group = _isuService.FindGroup(groupName)
+            Group group = _isuService
+                .FindGroup(groupName)
                 .ThrowIfNull(ScheduleServiceExceptionFactory.UnknownGroup(groupName));
 
             IEnumerable<Student> students = group.Students

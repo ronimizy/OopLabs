@@ -13,12 +13,18 @@ namespace IsuExtra.Tools
         public static ScheduleServiceException InvalidLessonTime(TimeSpan begin, TimeSpan end, string description)
             => new ScheduleServiceException($"Provided time for lesson is invalid. Begin: {begin}, end: {end}. {description}.");
 
-        // Study
+        // IIsuService related
+        public static ScheduleServiceException NotRegisteredFaculty(Faculty faculty)
+            => new ScheduleServiceException($"Faculty: {faculty} is not registered.");
 
-        // RegisterStudySubject
         public static ScheduleServiceException UnknownCourse(Course course)
             => new ScheduleServiceException($"Course: {course} is unknown.");
 
+        public static ScheduleServiceException UnknownGroup(GroupName name)
+            => new ScheduleServiceException($"Group named '{name}' is unknown.");
+
+        // Study
+        // RegisterStudySubject
         public static ScheduleServiceException ExistingStudySubject(StudySubject subject)
             => new ScheduleServiceException($"StudySubject: {subject} is already registered.");
 
@@ -35,16 +41,8 @@ namespace IsuExtra.Tools
         public static ScheduleServiceException ConflictingStudyGroupSchedule(GroupStudySchedule schedule)
             => new ScheduleServiceException($"StudyGroupSchedule: {schedule} is conflicting with {schedule.Group} schedule.");
 
-        // GetAvailableStudySubjects
-        public static ScheduleServiceException UnknownGroup(GroupName name)
-            => new ScheduleServiceException($"Group named '{name}' is unknown.");
-
         // ExtraStudy
-
         // RegisterExtraStudySubject
-        public static ScheduleServiceException NotRegisteredFaculty(Faculty faculty)
-            => new ScheduleServiceException($"Faculty: {faculty} is not registered.");
-
         public static ScheduleServiceException InvalidFaculty(Faculty expected, Faculty received)
             => new ScheduleServiceException($"Invalid Faculty. Expected: {expected}, received: {received}");
 
