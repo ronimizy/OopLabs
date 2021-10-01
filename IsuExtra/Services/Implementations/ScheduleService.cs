@@ -33,7 +33,7 @@ namespace IsuExtra.Services.Implementations
                 .FindFaculty(subject.Course.Faculty.Letter)
                 .ThrowIfNull(ScheduleServiceExceptionFactory.NotRegisteredFaculty(subject.Course.Faculty));
 
-            if (faculty.Equals(subject.Course.Faculty))
+            if (!faculty.Equals(subject.Course.Faculty))
                 throw ScheduleServiceExceptionFactory.UnknownCourse(subject.Course);
 
             if (_subjects.Contains(subject))
