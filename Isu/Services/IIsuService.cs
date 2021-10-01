@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Isu.Entities;
 using Isu.Models;
@@ -7,11 +8,16 @@ namespace Isu.Services
 {
     public interface IIsuService
     {
+        Faculty AddFaculty(string name, char letter);
+        Faculty? FindFaculty(char letter);
+
         Group AddGroup(GroupName name);
+
+        Mentor AddMentor(string name);
 
         Student AddStudent(Group group, string name);
 
-        Student? GetStudent(int id);
+        Student GetStudent(Guid id);
 
         Student? FindStudent(string name);
 
@@ -25,7 +31,7 @@ namespace Isu.Services
 
         void ChangeStudentGroup(Student student, Group newGroup);
 
-        static IIsuService Create(IsuApplicationConfiguration configuration)
+        static IIsuService Create(IsuServiceConfiguration configuration)
             => new IsuService(configuration);
     }
 }
