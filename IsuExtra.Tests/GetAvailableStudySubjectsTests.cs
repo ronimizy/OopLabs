@@ -20,7 +20,7 @@ namespace IsuExtra.Tests
             const char facultyLetter = 'M';
 
             const string groupName = "M3200";
-            const string otherGroupName = "3201";
+            const string otherGroupName = "M3201";
             const string subjectName = "Math";
             
             Faculty _ = IsuService.AddFaculty(facultyName, facultyLetter);

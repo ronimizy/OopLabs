@@ -39,8 +39,8 @@ namespace IsuExtra.Tests
             const string groupName = "M3200";
             const string subjectName = "Math";
             
-            Faculty _ = ForeignIsuService.AddFaculty(facultyName, facultyLetter);
-            Group group = ForeignIsuService.AddGroup(new GroupName(groupName));
+            Faculty _ = IsuService.AddFaculty(facultyName, facultyLetter);
+            Group group = IsuService.AddGroup(new GroupName(groupName));
             var subject = new StudySubject(subjectName, group.Course);
 
             ScheduleService.RegisterStudySubject(subject);
