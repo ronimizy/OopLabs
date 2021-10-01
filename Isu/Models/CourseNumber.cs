@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Isu.Tools;
 
 namespace Isu.Models
@@ -27,11 +28,16 @@ namespace Isu.Models
         public bool Equals(CourseNumber other)
             => Number == other.Number;
 
+        [ExcludeFromCodeCoverage]
         public override bool Equals(object? obj)
             => obj is CourseNumber && Equals(obj);
 
+        [ExcludeFromCodeCoverage]
         public override int GetHashCode()
             => Number.GetHashCode();
+
+        public override string ToString()
+            => Number.ToString();
 
         private static int Validate(int value)
         {
