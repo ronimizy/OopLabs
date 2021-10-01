@@ -1,0 +1,138 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+set namespaceSeparator .
+
+'interface Isu.IIsuUser 
+'{
+'    + Guid Id
+'    + string Name
+'}
+
+'Isu.IIsuUser <|.. Isu.Mentor
+class Isu.Mentor 
+{
+    + Guid Id
+    + string Name
+}
+
+'Isu.IIsuUser <|.. Isu.Student
+class Isu.Student
+{
+    + Guid Id
+    + string Name
+    + Group Group
+}
+
+class Isu.Group
+{
+    + Guid Id
+    + GroupName Name
+    + Course Course
+    + List<Student> Students
+}
+
+class Isu.Course 
+{
+    + Guid Id
+    + CourseNumber Number
+    + Faculty Faculty
+    + List<Group> Groups
+}
+
+class Isu.Faculty 
+{
+    + Guid Id
+    + string Name
+    + char Letter
+    + List<Course> Courses
+}
+
+note "Flags" as IsuExtra.Fl
+
+enum IsuExtra.LessonFrequency
+{
+    Odd = 1, 
+    Even = 2, 
+    Persistent = 3
+}
+
+class IsuExtra.Lesson 
+{
+    + LessonFrequency Frequency
+    + TimeSpan Begin
+    + TimeSpan Duration
+    + Mentor Mentor
+    + string RoomName
+}
+
+class IsuExtra.Schedule
+{
+    + List<Lesson> Lessons
+    --
+    + bool IntersectsWith(Schedule other)
+}
+
+class IsuExtra.ExtraStudyStream 
+{
+    + Guid Id
+    + string Name
+    + Schedule Schedule
+    + int Capacity
+    + List<Student> Students
+}
+
+class IsuExtra.ExtraStudySubject
+{
+    + Guid Id
+    + string Name
+    + Faculty Faculty
+    + List<ExtraStudyStream> Streams
+}
+
+class IsuExtra.StudyGroupSchedule
+{
+    + Guid Id
+    + Group Group
+    + Schedule Schedule
+}
+
+class IsuExtra.StudySubject
+{
+    + Guid Id
+    + string Name
+    + Course Course
+    + List<StudyGroupSchedule> Groups
+}
+
+
+'
+'
+'
+
+
+Isu.Group -up-o Isu.Student
+Isu.Group o-down- Isu.Student: 0...n
+
+Isu.Course -up-o Isu.Group
+Isu.Course o-down- Isu.Group: 0...n
+
+Isu.Course o-up- Isu.Faculty
+Isu.Faculty o-down- Isu.Course: 0...x
+
+Isu.Mentor -left-o IsuExtra.Lesson
+IsuExtra.Fl .right. IsuExtra.LessonFrequency 
+IsuExtra.LessonFrequency -right-o IsuExtra.Lesson
+IsuExtra.Schedule o-- IsuExtra.Lesson: 0...n
+
+IsuExtra.StudyGroupSchedule o-- IsuExtra.Schedule
+IsuExtra.StudyGroupSchedule o-- Isu.Group
+IsuExtra.StudySubject o-- Isu.Course
+IsuExtra.StudySubject o-- IsuExtra.StudyGroupSchedule: 0...n
+
+IsuExtra.ExtraStudyStream o-- IsuExtra.Schedule
+IsuExtra.ExtraStudyStream o-- Isu.Student: 0...x
+IsuExtra.ExtraStudySubject o-- IsuExtra.ExtraStudyStream: 0...n
+IsuExtra.ExtraStudySubject o-left- Isu.Faculty
+
+@enduml
