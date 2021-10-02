@@ -14,13 +14,13 @@ namespace IsuExtra.Entities
             roomName.ThrowIfNull(nameof(roomName));
 
             if (begin < TimeSpan.Zero || end < TimeSpan.Zero)
-                throw ScheduleServiceExceptionFactory.InvalidLessonTime(begin, end, "Time cannot be negative");
+                throw InvalidLessonTimeException(begin, end, "Time cannot be negative");
 
             if (begin >= TimeSpan.FromHours(24) || end >= TimeSpan.FromHours(24))
-                throw ScheduleServiceExceptionFactory.InvalidLessonTime(begin, end, "Time cannot exceed 24 hours");
+                throw InvalidLessonTimeException(begin, end, "Time cannot exceed 24 hours");
 
             if (begin > end)
-                throw ScheduleServiceExceptionFactory.InvalidLessonTime(begin, end, "Begin time cannot be greater than end time");
+                throw InvalidLessonTimeException(begin, end, "Begin time cannot be greater than end time");
 
             Id = Guid.NewGuid();
             DayOfWeek = dayOfWeek;
@@ -60,5 +60,8 @@ namespace IsuExtra.Entities
 
         public override int GetHashCode()
             => Id.GetHashCode();
+
+        private static ScheduleServiceException InvalidLessonTimeException(TimeSpan begin, TimeSpan end, string description)
+            => new ScheduleServiceException($"Provided time for lesson is invalid. Begin: {begin}, end: {end}. {description}.");
     }
 }

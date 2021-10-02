@@ -20,7 +20,7 @@ namespace IsuExtra.Entities
                 .ToList();
 
             if (IsIntersectsWith(this, (first, second) => !ReferenceEquals(first, second)))
-                throw ScheduleServiceExceptionFactory.OverlappingSchedule();
+                throw new ScheduleServiceException("Provided lessons are overlapping.");
         }
 
         internal Schedule(IEnumerable<Schedule> schedules)

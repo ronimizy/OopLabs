@@ -31,13 +31,13 @@ namespace IsuExtra.Services.Implementations
 
             Faculty faculty = _isuService
                 .FindFaculty(subject.Course.Faculty.Letter)
-                .ThrowIfNull(ScheduleServiceExceptionFactory.NotRegisteredFaculty(subject.Course.Faculty));
+                .ThrowIfNull(IsuServiceRelatedExceptionFactory.NotRegisteredFaculty(subject.Course.Faculty));
 
             if (!faculty.Equals(subject.Course.Faculty))
-                throw ScheduleServiceExceptionFactory.UnknownCourse(subject.Course);
+                throw IsuServiceRelatedExceptionFactory.UnknownCourse(subject.Course);
 
             if (_subjects.Contains(subject))
-                throw ScheduleServiceExceptionFactory.ExistingStudySubject(subject);
+                throw StudyRelatedExceptionFactory.ExistingStudySubject(subject);
 
             _subjects.Add(subject);
         }
@@ -48,22 +48,22 @@ namespace IsuExtra.Services.Implementations
 
             StudySubject subject = _subjects
                 .SingleOrDefault(s => s.Id.Equals(subjectId))
-                .ThrowIfNull(ScheduleServiceExceptionFactory.NotRegisteredStudySubject(subjectId));
+                .ThrowIfNull(StudyRelatedExceptionFactory.NotRegisteredStudySubject(subjectId));
 
             GroupName groupName = groupSchedule.Group.Name;
             Course subjectCourse = subject.Course;
 
             if (subjectCourse.Faculty.Letter != groupName.FacultyLetter ||
                 subjectCourse.Number != groupName.CourseNumber)
-                throw ScheduleServiceExceptionFactory.ForeignGroup(subject, groupSchedule.Group);
+                throw StudyRelatedExceptionFactory.ForeignGroup(subject, groupSchedule.Group);
 
             if (subject.GroupSchedules.Any(g => g.Group.Equals(groupSchedule.Group)))
-                throw ScheduleServiceExceptionFactory.ExistingGroupStudySchedule(subject, groupSchedule.Group);
+                throw StudyRelatedExceptionFactory.ExistingGroupStudySchedule(subject, groupSchedule.Group);
 
             Schedule schedule = GetGroupSchedule(groupSchedule.Group);
 
             if (groupSchedule.Schedule.IsIntersectsWith(schedule))
-                throw ScheduleServiceExceptionFactory.ConflictingStudyGroupSchedule(groupSchedule);
+                throw StudyRelatedExceptionFactory.ConflictingStudyGroupSchedule(groupSchedule);
 
             subject.AddGroupSchedule(groupSchedule);
         }
@@ -71,7 +71,7 @@ namespace IsuExtra.Services.Implementations
         public IReadOnlyCollection<StudySubject> GetAvailableStudySubjects(GroupName groupName)
         {
             Group group = _isuService.FindGroup(groupName)
-                .ThrowIfNull(ScheduleServiceExceptionFactory.UnknownGroup(groupName));
+                .ThrowIfNull(IsuServiceRelatedExceptionFactory.UnknownGroup(groupName));
 
             IEnumerable<StudySubject> subjects = _subjects
                 .Where(s => s.Course.Faculty.Letter == groupName.FacultyLetter)
@@ -87,13 +87,13 @@ namespace IsuExtra.Services.Implementations
 
             Faculty faculty = _isuService
                 .FindFaculty(subject.Faculty.Letter)
-                .ThrowIfNull(ScheduleServiceExceptionFactory.NotRegisteredFaculty(subject.Faculty));
+                .ThrowIfNull(IsuServiceRelatedExceptionFactory.NotRegisteredFaculty(subject.Faculty));
 
             if (!faculty.Equals(subject.Faculty))
-                throw ScheduleServiceExceptionFactory.InvalidFaculty(faculty, subject.Faculty);
+                throw ExtraStudyRelatedExceptionFactory.InvalidFaculty(faculty, subject.Faculty);
 
             if (_extraStudySubjects.Contains(subject))
-                throw ScheduleServiceExceptionFactory.ExistingExtraStudySubject(subject);
+                throw ExtraStudyRelatedExceptionFactory.ExistingExtraStudySubject(subject);
 
             _extraStudySubjects.Add(subject);
         }
@@ -104,10 +104,10 @@ namespace IsuExtra.Services.Implementations
 
             ExtraStudySubject subject = _extraStudySubjects
                 .SingleOrDefault(s => s.Id.Equals(subjectId))
-                .ThrowIfNull(ScheduleServiceExceptionFactory.NotRegisteredExtraStudySubject(subjectId));
+                .ThrowIfNull(ExtraStudyRelatedExceptionFactory.NotRegisteredExtraStudySubject(subjectId));
 
             if (subject.Streams.Contains(stream))
-                throw ScheduleServiceExceptionFactory.ExistingExtraStudyStream(subject, stream);
+                throw ExtraStudyRelatedExceptionFactory.ExistingExtraStudyStream(subject, stream);
 
             subject.AddStream(stream);
         }
@@ -118,21 +118,21 @@ namespace IsuExtra.Services.Implementations
             (ExtraStudySubject subject, ExtraStudyStream stream) = GetStreamSubject(streamId);
 
             if (GetStudentExtraStudySubjectCount(student) == _configuration.MaximumExtraStudyCount)
-                throw ScheduleServiceExceptionFactory.MaximumExtraStudySubjectAmount(student, _configuration.MaximumExtraStudyCount);
+                throw ExtraStudyRelatedExceptionFactory.MaximumExtraStudySubjectAmount(student, _configuration.MaximumExtraStudyCount);
 
             if (subject.Streams.Any(s => s.Contains(student)))
-                throw ScheduleServiceExceptionFactory.AlreadySignedStudent(subject, student);
+                throw ExtraStudyRelatedExceptionFactory.AlreadySignedStudent(subject, student);
 
             if (stream.Count == stream.Capacity)
-                throw ScheduleServiceExceptionFactory.MaximumExtraStudyStreamStudentCount(stream);
+                throw ExtraStudyRelatedExceptionFactory.MaximumExtraStudyStreamStudentCount(stream);
 
             if (subject.Faculty.Letter == student.Group.Name.FacultyLetter)
-                throw ScheduleServiceExceptionFactory.InvalidExtraStudySubjectForStudent(subject, student);
+                throw ExtraStudyRelatedExceptionFactory.InvalidExtraStudySubjectForStudent(subject, student);
 
             Schedule studentSchedule = GetStudentSchedule(student);
 
             if (studentSchedule.IsIntersectsWith(stream.Schedule))
-                throw ScheduleServiceExceptionFactory.ConflictingExtraStudyStreamSchedule(student, stream);
+                throw ExtraStudyRelatedExceptionFactory.ConflictingExtraStudyStreamSchedule(student, stream);
 
             stream.AddStudent(student);
         }
@@ -143,14 +143,14 @@ namespace IsuExtra.Services.Implementations
             (ExtraStudySubject _, ExtraStudyStream stream) = GetStreamSubject(streamId);
 
             if (!stream.RemoveStudent(student))
-                throw ScheduleServiceExceptionFactory.NonExistingStudent(stream, student);
+                throw ExtraStudyRelatedExceptionFactory.NonExistingStudent(stream, student);
         }
 
         public IReadOnlyCollection<Student> GetNotSignedUpStudents(GroupName groupName)
         {
             Group group = _isuService
                 .FindGroup(groupName)
-                .ThrowIfNull(ScheduleServiceExceptionFactory.UnknownGroup(groupName));
+                .ThrowIfNull(IsuServiceRelatedExceptionFactory.UnknownGroup(groupName));
 
             IEnumerable<Student> students = group.Students
                 .Where(student => _extraStudySubjects.Count(subject => subject.HasStudent(student)) < _configuration.MaximumExtraStudyCount);
@@ -201,7 +201,7 @@ namespace IsuExtra.Services.Implementations
                 .SingleOrDefault(p => p.str.Id.Equals(streamId));
 
             if (subjectStream == default)
-                throw ScheduleServiceExceptionFactory.NotRegisteredExtraStudyStream(streamId);
+                throw ExtraStudyRelatedExceptionFactory.NotRegisteredExtraStudyStream(streamId);
 
             return subjectStream;
         }
