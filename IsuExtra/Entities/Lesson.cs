@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Isu.Entities;
 using IsuExtra.Models;
 using IsuExtra.Tools;
 using Utility.Extensions;

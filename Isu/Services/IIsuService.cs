@@ -13,8 +13,6 @@ namespace Isu.Services
 
         Group AddGroup(GroupName name);
 
-        Mentor AddMentor(string name);
-
         Student AddStudent(Group group, string name);
 
         Student GetStudent(Guid id);

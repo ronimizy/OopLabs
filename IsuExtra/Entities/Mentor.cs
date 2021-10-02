@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Utility.Extensions;
 
-namespace Isu.Entities
+namespace IsuExtra.Entities
 {
     public class Mentor : IEquatable<Mentor>
     {

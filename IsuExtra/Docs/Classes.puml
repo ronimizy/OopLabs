@@ -3,12 +3,6 @@
 
 set namespaceSeparator .
 
-class Isu.Mentor 
-{
-    + Guid Id
-    + string Name
-}
-
 class Isu.Student
 {
     + Guid Id
@@ -41,6 +35,12 @@ class Isu.Faculty
 }
 
 note "Flags" as IsuExtra.Fl
+
+class IsuExtra.Mentor 
+{
+    + Guid Id
+    + string Name
+}
 
 enum IsuExtra.LessonFrequency
 {
@@ -113,7 +113,7 @@ Isu.Course o-down- Isu.Group: 0...n
 Isu.Course o-up- Isu.Faculty
 Isu.Faculty o-down- Isu.Course: 0...x
 
-Isu.Mentor -left-o IsuExtra.Lesson
+IsuExtra.Mentor -left-o IsuExtra.Lesson
 IsuExtra.Fl .right. IsuExtra.LessonFrequency 
 IsuExtra.LessonFrequency -right-o IsuExtra.Lesson
 IsuExtra.Schedule o-- IsuExtra.Lesson: 0...n

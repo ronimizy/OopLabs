@@ -55,14 +55,6 @@ namespace Isu.Services.Implementations
             return group;
         }
 
-        public Mentor AddMentor(string name)
-        {
-            name.ThrowIfNull(nameof(name));
-
-            var mentor = new Mentor(name);
-            return mentor;
-        }
-
         public Student AddStudent(Group group, string name)
         {
             group.ThrowIfNull(nameof(group));
