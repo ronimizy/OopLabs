@@ -34,7 +34,8 @@ namespace IsuExtra.Tests
             Group group = IsuService.AddGroup(new GroupName(groupName));
             Student student = IsuService.AddStudent(group, studentName);
 
-            var lesson = new Lesson(LessonFrequency.Even,
+            var lesson = new Lesson(DayOfWeek.Monday,
+                                    LessonFrequency.Even,
                                     TimeSpan.FromHours(13) + TimeSpan.FromMinutes(30),
                                     TimeSpan.FromHours(16) + TimeSpan.FromMinutes(50),
                                     new Mentor(mentorName),
@@ -76,7 +77,8 @@ namespace IsuExtra.Tests
             Group group = IsuService.AddGroup(new GroupName(groupName));
             Student student = IsuService.AddStudent(group, studentName);
 
-            var lesson = new Lesson(LessonFrequency.Even,
+            var lesson = new Lesson(DayOfWeek.Monday,
+                                    LessonFrequency.Even,
                                     TimeSpan.FromHours(13) + TimeSpan.FromMinutes(30),
                                     TimeSpan.FromHours(16) + TimeSpan.FromMinutes(50),
                                     new Mentor(mentorName),

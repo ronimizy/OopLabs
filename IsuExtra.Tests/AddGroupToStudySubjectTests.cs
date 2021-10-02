@@ -66,8 +66,12 @@ namespace IsuExtra.Tests
             const string mentorName = "Zin4ik";
             const string roomName = "228";
             
-            var lesson = new Lesson(LessonFrequency.Persistent, TimeSpan.FromHours(11), TimeSpan.FromHours(12),
-                                    new Mentor(mentorName), roomName);
+            var lesson = new Lesson(DayOfWeek.Monday, 
+                                    LessonFrequency.Persistent, 
+                                    TimeSpan.FromHours(11), 
+                                    TimeSpan.FromHours(12),
+                                    new Mentor(mentorName), 
+                                    roomName);
             var subject = new StudySubject(subjectName, _group.Course);
             var schedule = new GroupStudySchedule(_group, new Schedule(lesson));
             

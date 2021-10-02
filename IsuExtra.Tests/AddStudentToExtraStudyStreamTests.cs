@@ -127,7 +127,8 @@ namespace IsuExtra.Tests
             const string subjectName = "Base Math";
             const string extraSubjectName = "Math";
             
-            var lesson = new Lesson(LessonFrequency.Persistent,
+            var lesson = new Lesson(DayOfWeek.Monday,
+                                    LessonFrequency.Persistent,
                                     TimeSpan.FromHours(12),
                                     TimeSpan.FromHours(13),
                                     new Mentor(mentorName),

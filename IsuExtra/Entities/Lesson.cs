@@ -9,7 +9,7 @@ namespace IsuExtra.Entities
 {
     public class Lesson : IEquatable<Lesson>
     {
-        public Lesson(LessonFrequency frequency, TimeSpan begin, TimeSpan end, Mentor mentor, string roomName)
+        public Lesson(DayOfWeek dayOfWeek, LessonFrequency frequency, TimeSpan begin, TimeSpan end, Mentor mentor, string roomName)
         {
             mentor.ThrowIfNull(nameof(mentor));
             roomName.ThrowIfNull(nameof(roomName));
@@ -24,6 +24,7 @@ namespace IsuExtra.Entities
                 throw ScheduleServiceExceptionFactory.InvalidLessonTime(begin, end, "Begin time cannot be greater than end time");
 
             Id = Guid.NewGuid();
+            DayOfWeek = dayOfWeek;
             Frequency = frequency;
             Begin = begin;
             End = end;
@@ -32,6 +33,7 @@ namespace IsuExtra.Entities
         }
 
         public Guid Id { get; }
+        public DayOfWeek DayOfWeek { get; }
         public LessonFrequency Frequency { get; }
         public TimeSpan Begin { get; }
         public TimeSpan End { get; }
@@ -41,6 +43,9 @@ namespace IsuExtra.Entities
         public bool IsIntersectsWith(Lesson other)
         {
             if ((Frequency & other.Frequency) == 0)
+                return false;
+
+            if (!other.DayOfWeek.Equals(DayOfWeek))
                 return false;
 
             return (other.Begin <= Begin && Begin <= other.End) ||
