@@ -3,20 +3,12 @@
 
 set namespaceSeparator .
 
-'interface Isu.IIsuUser 
-'{
-'    + Guid Id
-'    + string Name
-'}
-
-'Isu.IIsuUser <|.. Isu.Mentor
 class Isu.Mentor 
 {
     + Guid Id
     + string Name
 }
 
-'Isu.IIsuUser <|.. Isu.Student
 class Isu.Student
 {
     + Guid Id
@@ -59,6 +51,7 @@ enum IsuExtra.LessonFrequency
 
 class IsuExtra.Lesson 
 {
+    + DayOfWeek DayOfWeek
     + LessonFrequency Frequency
     + TimeSpan Begin
     + TimeSpan Duration
