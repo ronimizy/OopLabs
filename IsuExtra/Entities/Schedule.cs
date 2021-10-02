@@ -38,13 +38,11 @@ namespace IsuExtra.Entities
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
-        private bool IsIntersectsWith(Schedule other, Func<Lesson, Lesson, bool> condition)
+        private bool IsIntersectsWith(Schedule other, Func<Lesson, Lesson, bool> predicate)
         {
-            IEnumerable<ValueTuple<Lesson, Lesson>> pairs =
-                from first in this
-                from second in other
-                where condition(first, second)
-                select (first, second);
+            IEnumerable<ValueTuple<Lesson, Lesson>> pairs = this
+                .SelectMany(_ => other, (first, second) => (first, second))
+                .Where(p => predicate(p.first, p.second));
 
             return pairs.Any(p => p.Item1.IsIntersectsWith(p.Item2));
         }
