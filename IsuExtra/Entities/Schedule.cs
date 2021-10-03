@@ -19,7 +19,7 @@ namespace IsuExtra.Entities
                 .Distinct()
                 .ToList();
 
-            if (IsIntersectsWith(this, (first, second) => !ReferenceEquals(first, second)))
+            if (IsIntersectsWithConditional(this, (first, second) => !ReferenceEquals(first, second)))
                 throw new ScheduleServiceException("Provided lessons are overlapping.");
         }
 
@@ -29,7 +29,7 @@ namespace IsuExtra.Entities
         public int Count => _lessons.Count;
 
         public bool IsIntersectsWith(Schedule other)
-            => IsIntersectsWith(other, (_, _) => true);
+            => IsIntersectsWithConditional(other);
 
         public IEnumerator<Lesson> GetEnumerator()
             => _lessons.GetEnumerator();
@@ -38,11 +38,11 @@ namespace IsuExtra.Entities
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
-        private bool IsIntersectsWith(Schedule other, Func<Lesson, Lesson, bool> predicate)
+        private bool IsIntersectsWithConditional(Schedule other, Func<Lesson, Lesson, bool>? predicate = null)
         {
             IEnumerable<ValueTuple<Lesson, Lesson>> pairs = this
                 .SelectMany(_ => other, (first, second) => (first, second))
-                .Where(p => predicate(p.first, p.second));
+                .Where(p => predicate?.Invoke(p.first, p.second) ?? true);
 
             return pairs.Any(p => p.Item1.IsIntersectsWith(p.Item2));
         }
