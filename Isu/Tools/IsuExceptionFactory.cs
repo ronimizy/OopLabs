@@ -3,7 +3,7 @@ using Isu.Models;
 
 namespace Isu.Tools
 {
-    public static class IsuExceptionFactory
+    internal static class IsuExceptionFactory
     {
         public static IsuException InvalidCourseNumberException(int value, string details = "")
             => new ($"{value} - is an invalid value for course number. {details}");
@@ -11,16 +11,28 @@ namespace Isu.Tools
         public static IsuException InvalidGroupNameException(string name, string details = "")
             => new ($"'{name}' - is invalid value for group name. {details}");
 
+        public static IsuException ExistingFacultyException(string name, char letter)
+            => new ($"Faculty called '{name}' or with letter '{letter}' already exists");
+
+        public static IsuException NonExistingFacultyException(char letter)
+            => new ($"Faculty with letter '{letter}' doesn't exist");
+
+        public static IsuException ExistingCourseException(Faculty faculty, CourseNumber number)
+            => new ($"Faculty {faculty} already course with number {number}");
+
         public static IsuException ExistingGroupException(GroupName name)
-            => new ($"Group named '{name.Name}' already exists");
+            => new ($"Group named '{name}' already exists");
 
         public static IsuException AlienGroupException(Group group)
-            => new ($"Grouped named '{group.Name}' doesn't being tracked by the service");
+            => new ($"Grouped '{group}' doesn't being tracked by the service");
 
         public static IsuException AlienStudentException(Student student)
-            => new ($"Grouped named '{student.Name}' doesn't being tracked by the service");
+            => new ($"Grouped named '{student}' doesn't being tracked by the service");
 
-        public static IsuException MaximumStudentCount(Group group, int count)
+        public static IsuException MaximumStudentCountException(Group group, int count)
             => new ($"{group} group already has {count} students");
+
+        public static IsuException InvalidGroupChangeException(Group group)
+            => new ($"Student is already in {group}");
     }
 }

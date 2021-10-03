@@ -11,16 +11,17 @@ namespace Isu.Tests
     public class Tests
     {
         private IIsuService _service;
-        private IsuApplicationConfiguration _configuration;
+        private IsuServiceConfiguration _configuration;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            _configuration = new IsuApplicationConfiguration
+            _configuration = new IsuServiceConfiguration
             {
                 MaxStudentCount = 20
             };
             _service = IIsuService.Create(_configuration);
+            _service.AddFaculty("ИС", 'M');
         }
 
         [Test]
@@ -44,12 +45,10 @@ namespace Isu.Tests
             Assert.Throws<IsuException>(() => _service.AddStudent(group, $"Student D{_configuration.MaxStudentCount}"));
         }
 
-        [Test]
         [TestCase("M32001")]
         [TestCase("33200")]
         [TestCase("Z320a")]
         [TestCase("M320a")]
-        [TestCase("M4200")]
         public void CreateGroupWithInvalidName_ThrowException(string name)
             => Assert.Throws<IsuException>(() => _service.AddGroup(new GroupName(name)));
 

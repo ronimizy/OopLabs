@@ -1,6 +1,6 @@
 namespace Isu.Models
 {
-    public sealed class IsuApplicationConfiguration
+    public sealed class IsuServiceConfiguration
     {
         public int MaxStudentCount { get; init; }
     }

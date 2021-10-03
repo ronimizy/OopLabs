@@ -1,27 +1,33 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Utility.Extensions;
 
 namespace Isu.Entities
 {
     public sealed class Student : IEquatable<Student>
     {
-        internal Student(int id, string name, Group group)
+        internal Student(string name, Group group)
         {
-            Id = id;
+            Id = Guid.NewGuid();
             Name = name.ThrowIfNull(nameof(name));
             Group = group.ThrowIfNull(nameof(group));
         }
 
-        public int Id { get; init; }
+        public Guid Id { get; init; }
         public string Name { get; set; }
         public Group Group { get; set; }
 
+        public override string ToString()
+            => $"[{Id}] - {Name} ({Group})";
+
         public bool Equals(Student? other)
-            => other is not null && Id == other.Id;
+            => other is not null && other.Id.Equals(Id);
 
+        [ExcludeFromCodeCoverage]
         public override bool Equals(object? obj)
-            => obj is Student other && Equals(other);
+            => Equals(obj as Student);
 
+        [ExcludeFromCodeCoverage]
         public override int GetHashCode()
             => Id.GetHashCode();
     }
