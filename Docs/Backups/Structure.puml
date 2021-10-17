@@ -1,0 +1,152 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+package Backups
+{
+    class Package
+    {
+        + string Name
+        + Stream Stream
+    }
+
+    interface IChronometer
+    {
+        --
+        + DateTime GetCurrentTime()
+    }
+    
+    interface ILogger
+    {
+        --
+        + void OnMessage(string message, string comment)
+        + void OnComment(string message)
+        + void OnException(Exception exception, string comment)
+    }
+    
+    interface IJobObject
+    {
+        + string Path
+        + int Version
+        --
+        + Package GetPackage()
+        + void IncrementVersion
+    }
+    
+    interface IPacker
+    {
+        --
+        + Package Pack(string name, ILogger? logger, Package[] objects)
+        + void AddToPackage(Stream package, ILogger? logger, Package[] object)
+        + void RemoveFromPackage(Stream package, ILogger? logger, Package[] object)
+    }
+    
+    interface IPackingAlgorithm
+    {
+        + IPacker Packer
+        --
+        + Package Pack(string name, IJobObject[] object, ILogger? logger);
+    }
+    
+    interface IRestorePointMatcher
+    {
+        --
+        + RestorePoint[] Match(RestorePoint[] originalPoints)
+    }
+    
+    interface IRestorePointFilter
+    {
+        --
+        + void Filter(\n\
+        Backup backup,\n\
+        IRestorePointMatcher matcher,\n\
+        IPacker packer,\n\
+        IPackageEditor editor,\n\
+        Repository repository, \n\
+        ILogger? logger)   
+    }
+    
+    interface IRepositoryAction
+    {
+        --
+        + Execute(Repository repository, ILogger? logger)
+    }
+    
+    abstract class Repository
+    {
+        + string Id
+        + JobObjectFactory GetObject
+        --
+        + bool Exists(string path)
+        + bool IsFolder(string path)
+        
+        + void Delete(string path)
+        + void Write(string path, Stream data)
+        
+        + string[] GetContentsOf(string folderPath)
+        + Stream GetStream(string path)   
+        
+        + void ExecuteAction(IRepositoryAction action)
+    }
+    
+    class JobObjectEntry
+    {
+        + string Name 
+        + int Version
+    }
+    
+    class RestorePoint
+    {
+        + DateTime CreatedDate
+        + List<JobObjectEntry> Entries
+    }
+    
+    class Backup
+    {
+        - ILogger? _logger
+        + List<RestorePoint> Points
+        --
+        + void AddPoints(RestorePoint[] point)
+        + void RemovePoints(RestorePoint[] point)
+    }
+    
+    class BackupJob
+    {
+        - IChronometer _chronometer
+        - IPackingAlgorithm _packingAlgorithm
+        - IRestorePointMatcher _restorePointMatcher
+        - IRestorePointFilter _restorePointFilter
+        - Repository _writingRepository
+        - JobObject[] Objects
+        - Backup Backup
+        - Logger? _logger
+        + string Name
+        --
+        + void AddObjects(JobObject[] obj)
+        + void RemoveObjects(JobObject[] obj) 
+        + void Execute()
+    }
+    
+    '
+    '
+    '
+    
+    BackupJob o-right- IChronometer
+    BackupJob o-- IPackingAlgorithm
+    BackupJob o-- Repository
+    BackupJob o-- IJobObject
+    BackupJob *-left- Backup
+    BackupJob o-up- IRestorePointMatcher
+    BackupJob o-up- IRestorePointFilter
+    BackupJob o-- ILogger
+    
+    RestorePoint o-down- JobObjectEntry
+    
+    Backup o-left- RestorePoint
+    Backup o-- ILogger
+    
+    IPacker <-left- Package
+    
+    Repository <-- IRepositoryAction   
+}
+
+@enduml
