@@ -24,7 +24,7 @@ namespace Backups.Tests
     public sealed class TcpTest : IDisposable
     {
         private const string JobName = "My Job";
-        
+
         private InMemoryRepository _readingRepository = null!;
         private InMemoryRepository _writingRepository = null!;
         private IChronometer _chronometer = null!;
@@ -83,12 +83,12 @@ namespace Backups.Tests
             string secondPath = $"2{BackupConfiguration.ExtensionDelimiter}txt";
             byte[] data = { 1, 2, 3, 4, 5 };
             var dateTime = new DateTime(2000, 1, 1);
-            
+
             _readingRepository.Write(firstPath, new MemoryStream(data));
             _readingRepository.Write(secondPath, new MemoryStream(data));
 
             _chronometer.GetCurrentTime().Returns(dateTime);
-            
+
             _backupJob.AddObjects(
                 _readingRepository.GetObject.AtPath(firstPath),
                 _readingRepository.GetObject.AtPath(secondPath));
@@ -97,19 +97,19 @@ namespace Backups.Tests
             string restorePointPath = $"{JobName}{BackupConfiguration.PathDelimiter}{BackupConfiguration.FormatDateTime(dateTime)}";
             string firstWrittenPath = $"{restorePointPath}{BackupConfiguration.PathDelimiter}[0]_{firstPath}{BackupConfiguration.ExtensionDelimiter}zip";
             string secondWrittenPath = $"{restorePointPath}{BackupConfiguration.PathDelimiter}[0]_{secondPath}{BackupConfiguration.ExtensionDelimiter}zip";
-            
+
             Assert.IsTrue(_writingRepository.Exists(JobName));
             Assert.IsTrue(_writingRepository.IsFolder(JobName));
-            
+
             Assert.IsTrue(_writingRepository.Exists(restorePointPath));
             Assert.IsTrue(_writingRepository.IsFolder(restorePointPath));
-            
+
             Assert.IsTrue(_writingRepository.Exists(firstWrittenPath));
             Assert.IsTrue(_writingRepository.Exists(secondWrittenPath));
-            
+
             AnsiConsole.WriteLine(nameof(_readingRepository));
             AnsiConsole.Write(new InMemoryRepositoryComposer(_readingRepository).Compose());
-            
+
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine(nameof(_writingRepository));
             AnsiConsole.Write(new InMemoryRepositoryComposer(_writingRepository).Compose());
@@ -117,7 +117,6 @@ namespace Backups.Tests
             _receiver.Stop();
         }
 
-        public void Dispose()
-            => _sender.Dispose();
+        public void Dispose() { }
     }
 }
