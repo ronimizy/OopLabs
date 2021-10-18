@@ -1,0 +1,61 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class BackupJob
+
+class BackupJobBuilder
+{
+    
+}
+
+interface IBackupJobBuilder
+{
+    + BackupJob Build()
+}
+
+interface IJobNamePicker
+{
+    + IJobPackingAlgorithmPicker Called(string name)
+}
+
+interface IJobPackingAlgorithmPicker
+{
+    + IJobChronometerPicker UsingAlgorithm(IPackingAlgorithm algorithm) 
+}
+
+interface IJobChronometerPicker
+{   
+    + IJobWritingRepositoryPicker TrackingTimeWith(IChronometer chronometer)
+}
+
+interface IJobWritingRepositoryPicker 
+{  
+    + IJobOptionalParameterPicker WritingTo(IRepository repository)
+}
+interface IJobOptionalParameterPicker 
+{   
+    + BackupJob Build()
+    + IJobOptionalParameterPicker WithRestorePointFilteringPolicy(\n\
+        IRestorePointFilter filter, IRestorePointMatcher matcher)
+}
+
+'
+'
+'
+
+BackupJobBuilder .right.|> IBackupJobBuilder
+BackupJobBuilder ..|> IJobNamePicker
+BackupJobBuilder ..|> IJobPackingAlgorithmPicker
+BackupJobBuilder ..|> IJobChronometerPicker
+BackupJobBuilder ..|> IJobWritingRepositoryPicker
+BackupJobBuilder ..|> IJobOptionalParameterPicker
+
+IBackupJobBuilder <|.. IJobOptionalParameterPicker
+
+BackupJob --> IJobNamePicker
+IJobNamePicker --> IJobPackingAlgorithmPicker
+IJobPackingAlgorithmPicker -> IJobChronometerPicker
+IJobChronometerPicker -up-> IJobWritingRepositoryPicker
+IJobWritingRepositoryPicker -up-> IJobOptionalParameterPicker
+
+@enduml
