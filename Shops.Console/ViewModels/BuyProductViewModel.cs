@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Shops.Console.Base.Interfaces;
-using Shops.Console.Base.Models;
 using Shops.Entities;
+using Spectre.Mvvm.Interfaces;
+using Spectre.Mvvm.Models;
 using Utility.Extensions;
 
 namespace Shops.Console.ViewModels

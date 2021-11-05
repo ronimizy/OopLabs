@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Shops.Console.Base.Interfaces;
 using Shops.Services;
 using Spectre.Console;
 using Spectre.Console.Rendering;
+using Spectre.Mvvm.Interfaces;
 
 namespace Shops.Console.ViewModels
 {
