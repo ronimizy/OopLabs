@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
-using Shops.Console.Base.Interfaces;
-using Shops.Console.Base.Views;
 using Shops.Console.Views;
 using Shops.Entities;
 using Shops.Services;
 using Spectre.Console;
 using Spectre.Console.Rendering;
+using Spectre.Mvvm.Interfaces;
+using Spectre.Mvvm.Views;
 using Utility.Extensions;
 
 namespace Shops.Console.ViewModels

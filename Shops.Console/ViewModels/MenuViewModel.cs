@@ -1,8 +1,8 @@
-using Shops.Console.Base.Interfaces;
-using Shops.Console.Base.Views;
 using Shops.Console.Views;
 using Shops.Entities;
 using Shops.Services;
+using Spectre.Mvvm.Interfaces;
+using Spectre.Mvvm.Views;
 
 namespace Shops.Console.ViewModels
 {

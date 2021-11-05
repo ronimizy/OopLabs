@@ -1,6 +1,6 @@
 using Spectre.Console;
 
-namespace Shops.Console.Base.Components
+namespace Spectre.Mvvm.Components
 {
     public class MarkupComponent : Component
     {
@@ -12,6 +12,6 @@ namespace Shops.Console.Base.Components
         }
 
         public override void Draw()
-            => AnsiConsole.Render(_value);
+            => AnsiConsole.Write(_value);
     }
 }

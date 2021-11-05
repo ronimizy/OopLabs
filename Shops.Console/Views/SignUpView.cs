@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Shops.Console.Base.Components;
-using Shops.Console.Base.Views;
 using Shops.Console.ViewModels;
+using Spectre.Mvvm.Components;
+using Spectre.Mvvm.Views;
 
 namespace Shops.Console.Views
 {

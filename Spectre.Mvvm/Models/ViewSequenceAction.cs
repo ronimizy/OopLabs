@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Shops.Console.Base.Views;
+using Spectre.Mvvm.Views;
 
-namespace Shops.Console.Base.Models
+namespace Spectre.Mvvm.Models
 {
     public class ViewSequenceAction
     {
