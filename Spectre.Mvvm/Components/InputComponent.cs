@@ -1,7 +1,7 @@
 using System;
 using Spectre.Console;
 
-namespace Shops.Console.Base.Components
+namespace Spectre.Mvvm.Components
 {
     public class InputComponent<T> : Component
     {

@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Spectre.Console;
 using Spectre.Console.Rendering;
-using Utility.Extensions;
 
-namespace Shops.Console.Base.Components
+namespace Spectre.Mvvm.Components
 {
     public class TableComponent : Component
     {
@@ -18,7 +17,7 @@ namespace Shops.Console.Base.Components
             IReadOnlyCollection<TableColumn> headers,
             IReadOnlyCollection<IReadOnlyCollection<IRenderable>> data)
         {
-            if (!data.IsEmpty() && headers.Count != data.First().Count)
+            if (data.Any() && headers.Count != data.First().Count)
                 throw new InvalidOperationException("Header column count does not match the data column count");
 
             _title = title;
@@ -42,7 +41,7 @@ namespace Shops.Console.Base.Components
                 table.AddRow(row);
             }
 
-            AnsiConsole.Render(table);
+            AnsiConsole.Write(table);
         }
     }
 }

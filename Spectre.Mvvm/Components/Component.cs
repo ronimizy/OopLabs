@@ -1,4 +1,4 @@
-namespace Shops.Console.Base.Components
+namespace Spectre.Mvvm.Components
 {
     public abstract class Component
     {

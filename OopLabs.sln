@@ -42,6 +42,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backups.Tcp.Client", "Backu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backups.Tcp.Server", "Backups.Tcp.Server\Backups.Tcp.Server.csproj", "{7DF82BA8-9B93-4F3B-812F-856770D7C9FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spectre.Mvvm", "Spectre.Mvvm\Spectre.Mvvm.csproj", "{BEAA62BA-9890-4B33-A276-83DA8D059DCF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -114,6 +116,10 @@ Global
 		{7DF82BA8-9B93-4F3B-812F-856770D7C9FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DF82BA8-9B93-4F3B-812F-856770D7C9FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DF82BA8-9B93-4F3B-812F-856770D7C9FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEAA62BA-9890-4B33-A276-83DA8D059DCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEAA62BA-9890-4B33-A276-83DA8D059DCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEAA62BA-9890-4B33-A276-83DA8D059DCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEAA62BA-9890-4B33-A276-83DA8D059DCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

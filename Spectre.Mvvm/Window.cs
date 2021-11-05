@@ -1,8 +1,8 @@
 using System.Threading;
-using Shops.Console.Base.Views;
 using Spectre.Console;
+using Spectre.Mvvm.Views;
 
-namespace Shops.Console.Base
+namespace Spectre.Mvvm
 {
     public class Window
     {

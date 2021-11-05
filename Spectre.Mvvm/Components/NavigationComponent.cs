@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using Shops.Console.Base.Interfaces;
-using Shops.Console.Base.Models;
-using Shops.Console.Base.Views;
 using Spectre.Console;
+using Spectre.Mvvm.Interfaces;
+using Spectre.Mvvm.Models;
+using Spectre.Mvvm.Views;
 
-namespace Shops.Console.Base.Components
+namespace Spectre.Mvvm.Components
 {
     public class NavigationComponent : Component
     {

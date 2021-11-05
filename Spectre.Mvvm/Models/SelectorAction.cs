@@ -1,6 +1,6 @@
 using System;
 
-namespace Shops.Console.Base.Models
+namespace Spectre.Mvvm.Models
 {
     public record SelectorAction(string Title, Action Action)
     {

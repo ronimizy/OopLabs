@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Shops.Console.Base.Components;
+using Spectre.Mvvm.Components;
 
-namespace Shops.Console.Base.Views
+namespace Spectre.Mvvm.Views
 {
     public abstract class View
     {
