@@ -1,6 +1,6 @@
-using Shops.Console.Base.Views;
+using Spectre.Mvvm.Views;
 
-namespace Shops.Console.Base.Interfaces
+namespace Spectre.Mvvm.Interfaces
 {
     public interface INavigator
     {

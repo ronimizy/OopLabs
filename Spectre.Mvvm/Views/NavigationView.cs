@@ -1,9 +1,9 @@
 using System;
-using Shops.Console.Base.Interfaces;
-using Shops.Console.Base.ViewModels;
 using Spectre.Console;
+using Spectre.Mvvm.Interfaces;
+using Spectre.Mvvm.ViewModels;
 
-namespace Shops.Console.Base.Views
+namespace Spectre.Mvvm.Views
 {
     public class NavigationView : View
     {

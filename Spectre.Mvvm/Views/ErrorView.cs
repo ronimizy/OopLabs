@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Shops.Console.Base.Components;
-using Shops.Console.Base.Interfaces;
 using Spectre.Console;
+using Spectre.Mvvm.Components;
+using Spectre.Mvvm.Interfaces;
 
-namespace Shops.Console.Base.Views
+namespace Spectre.Mvvm.Views
 {
     public class ErrorView : View
     {

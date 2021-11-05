@@ -1,6 +1,6 @@
-using Shops.Console.Base.Components;
 using Shops.Entities;
 using Spectre.Console;
+using Spectre.Mvvm.Components;
 
 namespace Shops.Console.Components
 {

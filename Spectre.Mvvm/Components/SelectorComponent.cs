@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Spectre.Console;
-using Utility.Extensions;
 
-namespace Shops.Console.Base.Components
+namespace Spectre.Mvvm.Components
 {
     public class SelectorComponent<T> : Component
         where T : notnull
@@ -25,7 +25,7 @@ namespace Shops.Console.Base.Components
 
         public override void Draw()
         {
-            if (_choices.IsEmpty())
+            if (!_choices.Any())
                 return;
 
             SelectionPrompt<T> prompt = new SelectionPrompt<T>
