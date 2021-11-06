@@ -152,8 +152,6 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.Percentage = percentage;
-            _databaseContext.AccountPlans.Update(plan);
-            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Debit account plan update",
@@ -171,8 +169,6 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.AddOrUpdateLevel(level);
-            _databaseContext.AccountPlans.Update(plan);
-            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Deposit account plan update",
@@ -190,8 +186,6 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.RemoveLevel(level);
-            _databaseContext.AccountPlans.Update(plan);
-            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Deposit account plan update",
@@ -208,8 +202,6 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.Percentage = percentage;
-            _databaseContext.AccountPlans.Update(plan);
-            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Credit account plan update",
@@ -226,8 +218,6 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.Limit = limit;
-            _databaseContext.AccountPlans.Update(plan);
-            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Credit account plan update",
@@ -295,11 +285,7 @@ namespace Banks.Entities
 
         private void NotifyHolders(AccountPlan plan, Message message)
         {
-            IEnumerable<Client> clients = _operatedAccounts
-                .Where(a => plan.Equals(a.Plan))
-                .Select(a => a.Owner);
-
-            foreach (Client client in clients)
+            foreach (Client client in plan.Subscribers)
             {
                 _notificationService.Notify(this, client, message);
             }

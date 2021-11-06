@@ -8,7 +8,7 @@ namespace Banks.Builders.ClientBuilder
     {
         IBuilder<Client> Builder { get; }
 
-        IClientOptionalInfoSelector WithAddress(string address);
-        IClientOptionalInfoSelector WithPassportData(PassportData passportData);
+        IClientOptionalInfoSelector WithAddress(string? address);
+        IClientOptionalInfoSelector WithPassportData(PassportData? passportData);
     }
 }

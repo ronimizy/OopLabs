@@ -10,6 +10,9 @@ namespace Banks.ExceptionFactories
 {
     internal static class BankExceptionFactory
     {
+        public static BanksException EmptyEmailException(Client client)
+            => new BanksException($"Client {client} has no email specified");
+
         public static BanksException ExisingClientException(EmailAddress address)
             => new BanksException($"Client with email address {address} already exists");
 

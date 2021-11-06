@@ -62,31 +62,31 @@ namespace Banks.Services
             _databaseContext.SaveChanges();
         }
 
-        public IReadOnlyCollection<EmailPreview> PreviewsForClient(EmailUser client)
+        public IReadOnlyCollection<EmailPreview> PreviewsForUser(EmailUser user)
         {
-            client.ThrowIfNull(nameof(client));
+            user.ThrowIfNull(nameof(user));
 
             return _databaseContext.Emails
-                .Where(e => e.Receiver.Equals(client.Address))
+                .Where(e => e.Receiver.Equals(user.Address))
                 .Select(e => e.Preview)
                 .ToList();
         }
 
-        public int NotViewedEmailCountForClient(EmailUser client)
+        public int NotViewedEmailCountForUser(EmailUser user)
         {
-            client.ThrowIfNull(nameof(client));
+            user.ThrowIfNull(nameof(user));
 
             return _databaseContext.Emails
-                .Count(e => e.Receiver.Equals(client.Address) && !e.Viewed);
+                .Count(e => e.Receiver.Equals(user.Address) && !e.Viewed);
         }
 
-        public Email GetEmail(EmailUser client, Guid emailId)
+        public Email GetEmail(EmailUser user, Guid emailId)
         {
-            client.ThrowIfNull(nameof(client));
+            user.ThrowIfNull(nameof(user));
 
             Email email = _databaseContext.Emails
-                .SingleOrDefault(e => e.Receiver.Equals(client.Address) && e.Id.Equals(emailId))
-                .ThrowIfNull(MailingServiceExceptionFactory.MissingEmailException(client, emailId));
+                .SingleOrDefault(e => e.Receiver.Equals(user.Address) && e.Id.Equals(emailId))
+                .ThrowIfNull(MailingServiceExceptionFactory.MissingEmailException(user, emailId));
 
             email.Viewed = true;
             return email;

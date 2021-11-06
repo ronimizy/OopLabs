@@ -37,7 +37,11 @@ namespace Banks.Tests
                 .EnableSensitiveDataLogging()
                 .Options;
 
-            var plan = new DebitAccountPlan(Percent);
+            _chronometer = new ChronometerMock();
+            _mailingDatabaseContext = new MailingDatabaseContext(mailingContextOptions);
+            _banksContext = new BanksDatabaseContext(banksContextOptions, _chronometer, new MailingService(_mailingDatabaseContext));
+
+            var plan = new DebitAccountPlan(Percent, _banksContext);
 
             Client client = Client.BuildClient
                 .Called("Me", "eM")
@@ -46,10 +50,6 @@ namespace Banks.Tests
                 .WithAddress("address")
                 .WithPassportData(new PassportData("21231212", "444444"))
                 .Build();
-            
-            _chronometer = new ChronometerMock();
-            _mailingDatabaseContext = new MailingDatabaseContext(mailingContextOptions);
-            _banksContext = new BanksDatabaseContext(banksContextOptions, _chronometer, new MailingService(_mailingDatabaseContext));
             _account = new AccountFactory(_banksContext).CreateDebitAccount(client, plan, new SuspiciousLimitPolicy(decimal.MaxValue));
         }
 

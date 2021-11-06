@@ -46,11 +46,11 @@ namespace Banks
             Client client = centralBank.RegisterClient(clientBuilder);
 
             Bank bank = centralBank.RegisterBank($"My bank {DateTime.UtcNow}", client, new SuspiciousLimitPolicy(decimal.MaxValue));
-            IBuilder<DebitAccountPlan> debitPlanBuilder = DebitAccountPlan.BuildPlan.WithDebitPercentage(0.1m);
-            IBuilder<DepositAccountPlan> depositPlanBuilder = DepositAccountPlan.BuildPlan
+            IBuilder<DebitAccountPlan> debitPlanBuilder = centralBank.BuildDebitPlan.WithDebitPercentage(0.1m);
+            IBuilder<DepositAccountPlan> depositPlanBuilder = centralBank.BuildDepositPlan
                 .WithLevel(new DepositPercentLevel(baseDeposit, 0.05m))
                 .Builder;
-            IBuilder<CreditAccountPlan> creditPlanBuilder = CreditAccountPlan.BuildPlan
+            IBuilder<CreditAccountPlan> creditPlanBuilder = centralBank.BuildCreditPlan
                 .LimitedTo(creditLimit)
                 .WithCommissionPercent(0.05m);
 

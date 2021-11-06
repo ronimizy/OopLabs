@@ -95,6 +95,7 @@ namespace Banks.Tools
             modelBuilder.Entity<DepositPercentLevel>();
 
             modelBuilder.Entity<CreditAccountPlan>().Property(p => p.Percentage).HasField("_percentage");
+            modelBuilder.Entity<CreditAccountPlan>().Property(p => p.Limit).HasField("_limit");
         }
 
         private static void ConfigureCommands(ModelBuilder modelBuilder)

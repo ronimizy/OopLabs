@@ -36,15 +36,15 @@ namespace Banks.Builders.ClientBuilder
             return this;
         }
 
-        public IClientOptionalInfoSelector WithAddress(string address)
+        public IClientOptionalInfoSelector WithAddress(string? address)
         {
-            _address = address.ThrowIfNull(nameof(address));
+            _address = address;
             return this;
         }
 
-        public IClientOptionalInfoSelector WithPassportData(PassportData passportData)
+        public IClientOptionalInfoSelector WithPassportData(PassportData? passportData)
         {
-            _passportData = passportData.ThrowIfNull(nameof(passportData));
+            _passportData = passportData;
             return this;
         }
 

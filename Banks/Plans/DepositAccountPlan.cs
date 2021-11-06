@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using Banks.Builders.DepositAccountPlanBuilder;
 using Banks.ExceptionFactories;
 using Banks.Models;
+using Banks.Tools;
 using Utility.Extensions;
 
 namespace Banks.Plans
@@ -12,16 +12,16 @@ namespace Banks.Plans
     {
         private readonly List<DepositPercentLevel> _levels;
 
-        public DepositAccountPlan(IReadOnlyCollection<DepositPercentLevel> levels)
+        public DepositAccountPlan(IReadOnlyCollection<DepositPercentLevel> levels, BanksDatabaseContext databaseContext)
+            : base(databaseContext)
         {
             _levels = levels.ThrowIfNull(nameof(levels)).ToList();
         }
 
 #pragma warning disable 8618
-        private DepositAccountPlan() { }
+        private DepositAccountPlan(BanksDatabaseContext databaseContext)
 #pragma warning restore 8618
-
-        public static IDepositPercentageLevelSelector BuildPlan => new DepositAccountPlanBuilder();
+            : base(databaseContext) { }
 
         [NotMapped]
         public IReadOnlyCollection<DepositPercentLevel> Levels => _levels;
@@ -45,6 +45,8 @@ namespace Banks.Plans
                 _levels.Remove(exisingLevel);
 
             _levels.Add(level);
+            DatabaseContext.AccountPlans.Update(this);
+            DatabaseContext.SaveChanges();
         }
 
         internal void RemoveLevel(DepositPercentLevel level)
@@ -55,6 +57,8 @@ namespace Banks.Plans
 
             exisingLevel.ThrowIfNull(AccountPlanExceptionFactory.ForeignDepositPercentLevelException(this, level));
             _levels.Remove(exisingLevel!);
+            DatabaseContext.AccountPlans.Update(this);
+            DatabaseContext.SaveChanges();
         }
 
         internal decimal RetrievePercent(decimal amount)

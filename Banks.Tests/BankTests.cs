@@ -76,11 +76,11 @@ namespace Banks.Tests
             var unlockDateTime = new DateTime(2020, 10, 2);
 
             Bank bank = _centralBank.RegisterBank(bankName, _client, new SuspiciousLimitPolicy(decimal.MaxValue));
-            IBuilder<DebitAccountPlan> debitPlanBuilder = DebitAccountPlan.BuildPlan.WithDebitPercentage(0.1m);
-            IBuilder<DepositAccountPlan> depositPlanBuilder = DepositAccountPlan.BuildPlan
+            IBuilder<DebitAccountPlan> debitPlanBuilder = _centralBank.BuildDebitPlan.WithDebitPercentage(0.1m);
+            IBuilder<DepositAccountPlan> depositPlanBuilder = _centralBank.BuildDepositPlan
                 .WithLevel(new DepositPercentLevel(baseDeposit, 0.05m))
                 .Builder;
-            IBuilder<CreditAccountPlan> creditPlanBuilder = CreditAccountPlan.BuildPlan
+            IBuilder<CreditAccountPlan> creditPlanBuilder = _centralBank.BuildCreditPlan
                 .LimitedTo(creditLimit)
                 .WithCommissionPercent(0.05m);
 

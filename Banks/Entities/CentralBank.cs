@@ -1,4 +1,7 @@
 using System.Linq;
+using Banks.Builders.CreditAccountPlanBuilder;
+using Banks.Builders.DebitAccountPlanBuilder;
+using Banks.Builders.DepositAccountPlanBuilder;
 using Banks.ExceptionFactories;
 using Banks.Models;
 using Banks.Tools;
@@ -15,10 +18,17 @@ namespace Banks.Entities
             _databaseContext = databaseContext.ThrowIfNull(nameof(databaseContext));
         }
 
+        public ICreditLimitSelector BuildCreditPlan => new CreditAccountPlanBuilder(_databaseContext);
+        public IDebitPercentageSelector BuildDebitPlan => new DebitAccountPlanBuilder(_databaseContext);
+        public IDepositPercentageLevelSelector BuildDepositPlan => new DepositAccountPlanBuilder(_databaseContext);
+
         public Client RegisterClient(IBuilder<Client> clientBuilder)
         {
             clientBuilder.ThrowIfNull(nameof(clientBuilder));
             Client client = clientBuilder.Build().ThrowIfNull(nameof(Client));
+
+            if (client.EmailAddress.IsEmpty)
+                throw BankExceptionFactory.EmptyEmailException(client);
 
             if (_databaseContext.Clients.AsEnumerable().Any(c => c.EmailAddress.Equals(client.EmailAddress)))
                 throw BankExceptionFactory.ExisingClientException(client.EmailAddress);
