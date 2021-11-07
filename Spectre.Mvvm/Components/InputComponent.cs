@@ -9,25 +9,34 @@ namespace Spectre.Mvvm.Components
         private readonly Func<T, ValidationResult> _validator;
         private readonly bool _optional;
 
-        public InputComponent(string title, Func<T, bool>? validator = null, bool optional = false)
+        public InputComponent(
+            string title,
+            Func<T, bool>? validator = null,
+            bool optional = false,
+            ValueSubmittedHandler? defaultHandler = null)
         {
             _title = title;
             _optional = optional;
             _validator = v => validator?.Invoke(v) ?? true
-                                  ? ValidationResult.Success()
-                                  : ValidationResult.Error();
+                ? ValidationResult.Success()
+                : ValidationResult.Error();
+            ValueSubmitted += defaultHandler;
         }
 
         public delegate void ValueSubmittedHandler(T value);
 
         public event ValueSubmittedHandler? ValueSubmitted;
 
+        public bool IsSecret { get; init; }
+
         public override void Draw()
         {
-            TextPrompt<T> input = new TextPrompt<T>(_title)
-                .Validate(_validator);
-
-            input.AllowEmpty = _optional;
+            var input = new TextPrompt<T>(_title)
+            {
+                IsSecret = IsSecret,
+                Validator = _validator,
+                AllowEmpty = _optional,
+            };
 
             T value = AnsiConsole.Prompt(input);
             OnValueSubmitted(value);
