@@ -2,40 +2,29 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Banks.Builders.CreditAccountPlanBuilder;
 using Banks.ExceptionFactories;
 using Banks.Models;
-using Banks.Tools;
 
 namespace Banks.Plans
 {
     public sealed class CreditAccountPlan : AccountPlan
     {
         private decimal _percentage;
-        private decimal _limit;
 
-        public CreditAccountPlan(decimal limit, decimal percentage, BanksDatabaseContext databaseContext)
-            : base(databaseContext)
+        public CreditAccountPlan(decimal limit, decimal percentage)
         {
             if (percentage < 0)
                 throw AccountPlanExceptionFactory.NegativePercentageException(percentage);
 
-            _limit = limit;
+            Limit = limit;
             _percentage = percentage;
         }
 
 #pragma warning disable 8618
-        private CreditAccountPlan(BanksDatabaseContext databaseContext)
+        private CreditAccountPlan() { }
 #pragma warning restore 8618
-            : base(databaseContext) { }
 
-        public decimal Limit
-        {
-            get => _limit;
-            internal set
-            {
-                _limit = value;
-                DatabaseContext.AccountPlans.Update(this);
-                DatabaseContext.SaveChanges();
-            }
-        }
+        public static ICreditLimitSelector BuildPlan => new CreditAccountPlanBuilder();
+
+        public decimal Limit { get; internal set; }
 
         public decimal Percentage
         {
@@ -46,8 +35,6 @@ namespace Banks.Plans
                     throw AccountPlanExceptionFactory.NegativePercentageException(value);
 
                 _percentage = value;
-                DatabaseContext.AccountPlans.Update(this);
-                DatabaseContext.SaveChanges();
             }
         }
 
@@ -61,6 +48,9 @@ namespace Banks.Plans
 
         public decimal CalculateWithdrawalCommission(decimal balance, decimal withdrawalAmount)
             => CalculateByDept(balance);
+
+        public override string ToString()
+            => $"{nameof(CreditAccountPlan)} - {Percentage}%, Limit: {Limit}";
 
         public override bool Equals(AccountPlan? other)
             => other is CreditAccountPlan && other.Id.Equals(Id);

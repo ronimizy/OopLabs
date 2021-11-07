@@ -7,12 +7,10 @@ namespace Banks.Builders.DepositAccountPlanBuilder
 {
     internal class DepositAccountPlanBuilder : IDepositPercentageLevelSelector, IEqualityComparer<DepositPercentLevel>
     {
-        private readonly BanksDatabaseContext _databaseContext;
         private readonly HashSet<DepositPercentLevel> _levels;
 
-        public DepositAccountPlanBuilder(BanksDatabaseContext databaseContext)
+        public DepositAccountPlanBuilder()
         {
-            _databaseContext = databaseContext;
             _levels = new HashSet<DepositPercentLevel>(this);
         }
 
@@ -28,7 +26,7 @@ namespace Banks.Builders.DepositAccountPlanBuilder
         }
 
         public DepositAccountPlan Build()
-            => new DepositAccountPlan(_levels, _databaseContext);
+            => new DepositAccountPlan(_levels);
 
         public bool Equals(DepositPercentLevel? x, DepositPercentLevel? y)
             => x is not null && y is not null && x.Amount.Equals(y.Amount);

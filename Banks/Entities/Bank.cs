@@ -59,6 +59,9 @@ namespace Banks.Entities
         public SuspiciousLimitPolicy SuspiciousLimitPolicy { get; private init; }
 
         [NotMapped]
+        public IReadOnlyCollection<Account> OperatedAccounts => _operatedAccounts;
+
+        [NotMapped]
         public IReadOnlyCollection<DebitAccountPlan> DebitAccountPlans => _debitAccountPlans;
 
         [NotMapped]
@@ -67,22 +70,25 @@ namespace Banks.Entities
         [NotMapped]
         public IReadOnlyCollection<CreditAccountPlan> CreditAccountPlans => _creditAccountPlans;
 
-        public void RegisterDebitAccountPlan(IBuilder<DebitAccountPlan> builder)
+        public void RegisterDebitAccountPlan(Client client, IBuilder<DebitAccountPlan> builder)
         {
+            ThrowIfNotOwner(client);
             builder.ThrowIfNull(nameof(builder));
             _debitAccountPlans.Add(builder.Build());
             UpdateBank();
         }
 
-        public void RegisterDepositAccountPlan(IBuilder<DepositAccountPlan> builder)
+        public void RegisterDepositAccountPlan(Client client, IBuilder<DepositAccountPlan> builder)
         {
+            ThrowIfNotOwner(client);
             builder.ThrowIfNull(nameof(builder));
             _depositAccountPlans.Add(builder.Build());
             UpdateBank();
         }
 
-        public void RegisterCreditAccountPlan(IBuilder<CreditAccountPlan> builder)
+        public void RegisterCreditAccountPlan(Client client, IBuilder<CreditAccountPlan> builder)
         {
+            ThrowIfNotOwner(client);
             builder.ThrowIfNull(nameof(builder));
             _creditAccountPlans.Add(builder.Build());
             UpdateBank();
@@ -143,8 +149,9 @@ namespace Banks.Entities
             return account;
         }
 
-        public void UpdateDebitAccountPlanPercentage(DebitAccountPlan plan, decimal percentage)
+        public void UpdateDebitAccountPlanPercentage(Client client, DebitAccountPlan plan, decimal percentage)
         {
+            ThrowIfNotOwner(client);
             plan.ThrowIfNull(nameof(plan));
             plan.Id.ThrowIfNull(BankExceptionFactory.UnregisteredPlanException());
 
@@ -152,6 +159,8 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.Percentage = percentage;
+            _databaseContext.AccountPlans.Update(plan);
+            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Debit account plan update",
@@ -159,8 +168,9 @@ namespace Banks.Entities
             NotifyHolders(plan, message);
         }
 
-        public void AddOrUpdateDepositAccountPlanLevel(DepositAccountPlan plan, DepositPercentLevel level)
+        public void AddOrUpdateDepositAccountPlanLevel(Client client, DepositAccountPlan plan, DepositPercentLevel level)
         {
+            ThrowIfNotOwner(client);
             plan.ThrowIfNull(nameof(plan));
             plan.Id.ThrowIfNull(BankExceptionFactory.UnregisteredPlanException());
             level.ThrowIfNull(nameof(level));
@@ -169,6 +179,8 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.AddOrUpdateLevel(level);
+            _databaseContext.AccountPlans.Update(plan);
+            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Deposit account plan update",
@@ -176,8 +188,9 @@ namespace Banks.Entities
             NotifyHolders(plan, message);
         }
 
-        public void RemoveDepositAccountPlanLevel(DepositAccountPlan plan, DepositPercentLevel level)
+        public void RemoveDepositAccountPlanLevel(Client client, DepositAccountPlan plan, DepositPercentLevel level)
         {
+            ThrowIfNotOwner(client);
             plan.ThrowIfNull(nameof(plan));
             plan.Id.ThrowIfNull(BankExceptionFactory.UnregisteredPlanException());
             level.ThrowIfNull(nameof(level));
@@ -186,6 +199,8 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.RemoveLevel(level);
+            _databaseContext.AccountPlans.Update(plan);
+            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Deposit account plan update",
@@ -193,8 +208,9 @@ namespace Banks.Entities
             NotifyHolders(plan, message);
         }
 
-        public void UpdateCreditAccountPlanPercentage(CreditAccountPlan plan, decimal percentage)
+        public void UpdateCreditAccountPlanPercentage(Client client, CreditAccountPlan plan, decimal percentage)
         {
+            ThrowIfNotOwner(client);
             plan.ThrowIfNull(nameof(plan));
             plan.Id.ThrowIfNull(BankExceptionFactory.UnregisteredPlanException());
 
@@ -202,6 +218,8 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.Percentage = percentage;
+            _databaseContext.AccountPlans.Update(plan);
+            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Credit account plan update",
@@ -209,8 +227,9 @@ namespace Banks.Entities
             NotifyHolders(plan, message);
         }
 
-        public void UpdateCreditAccountPlanLimit(CreditAccountPlan plan, decimal limit)
+        public void UpdateCreditAccountPlanLimit(Client client, CreditAccountPlan plan, decimal limit)
         {
+            ThrowIfNotOwner(client);
             plan.ThrowIfNull(nameof(plan));
             plan.Id.ThrowIfNull(BankExceptionFactory.UnregisteredPlanException());
 
@@ -218,6 +237,8 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
 
             plan.Limit = limit;
+            _databaseContext.AccountPlans.Update(plan);
+            _databaseContext.SaveChanges();
 
             var message = new Message(
                 "Credit account plan update",
@@ -249,17 +270,65 @@ namespace Banks.Entities
                 throw BankExceptionFactory.FailedOperationException(this, account, command.Info);
         }
 
-        public void TransferFunds(Account origin, Account destination, decimal amount)
+        public void TransferFunds(Account origin, Guid destinationId, decimal amount)
         {
             origin.ThrowIfNull(nameof(origin));
-            destination.ThrowIfNull(nameof(destination));
 
             if (!_operatedAccounts.Contains(origin))
                 throw BankExceptionFactory.ForeignAccountException(this, origin);
 
+            Account destination = _databaseContext.Banks
+                .AsEnumerable()
+                .SelectMany(b => b.OperatedAccounts)
+                .SingleOrDefault(a => destinationId.Equals(a.Id))
+                .ThrowIfNull(BankExceptionFactory.UnknownAccountException(destinationId));
+
             var command = new TransferringAccountCommand(amount, origin, destination);
             if (!origin.TryExecuteCommand(command))
                 throw BankExceptionFactory.FailedOperationException(this, origin, command.Info);
+        }
+
+        public void CancelOperation(Client client, Account account, Guid operationId)
+        {
+            client.ThrowIfNull(nameof(client));
+            account.ThrowIfNull(nameof(account));
+            ThrowIfNotOwner(client);
+
+            if (!_operatedAccounts.Contains(account))
+                throw BankExceptionFactory.ForeignAccountException(this, account);
+
+            if (!account.TryCancelOperation(operationId))
+                throw BankExceptionFactory.FailedToCancelOperationException(account, operationId);
+        }
+
+        public void SubscribeToPlanUpdates(Client client, AccountPlan plan)
+        {
+            client.ThrowIfNull(nameof(client));
+            plan.ThrowIfNull(nameof(plan));
+            plan.Id.ThrowIfNull(BankExceptionFactory.UnregisteredPlanException());
+
+            if (!_debitAccountPlans.Contains(plan) && !_creditAccountPlans.Contains(plan) && !_depositAccountPlans.Contains(plan))
+                throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
+
+            if (plan.Subscribers.Contains(client) || !_operatedAccounts.Any(a => a.Owner.Equals(client) && plan.Equals(plan)))
+                throw BankExceptionFactory.CannotSubscribeException(plan, client);
+
+            plan.Subscribe(client);
+        }
+
+        public void UnsubscribeFromPlanUpdates(Client client, AccountPlan plan)
+        {
+            client.ThrowIfNull(nameof(client));
+            plan.ThrowIfNull(nameof(plan));
+            plan.Id.ThrowIfNull(BankExceptionFactory.UnregisteredPlanException());
+
+            if (!_debitAccountPlans.Contains(plan) && !_creditAccountPlans.Contains(plan) && !_depositAccountPlans.Contains(plan))
+                throw BankExceptionFactory.ForeignPlanException(this, plan.Id!.Value);
+
+            if (!plan.Subscribers.Contains(client))
+                throw BankExceptionFactory.CannotUnsubscribeException(plan, client);
+
+            plan.Unsubscribe(client);
         }
 
         public IReadOnlyCollection<Account> AccountsForClient(Client client)
@@ -289,6 +358,12 @@ namespace Banks.Entities
             {
                 _notificationService.Notify(this, client, message);
             }
+        }
+
+        private void ThrowIfNotOwner(Client client)
+        {
+            if (!client.Equals(Owner))
+                throw BankExceptionFactory.InsufficientPermissionException(client);
         }
     }
 }

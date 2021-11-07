@@ -21,5 +21,8 @@ namespace Banks.Models
 
         public string Serial { get; private init; }
         public string Number { get; private init; }
+
+        public override string ToString()
+            => $"{Serial} | {Number}";
     }
 }

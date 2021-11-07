@@ -22,7 +22,8 @@ namespace Banks.Accounts.Wrappers
             if (entry?.State is OperationState.Canceled || entry?.RevertCommand is null)
                 return false;
 
-            return Wrapped.TryExecuteCommand(entry.RevertCommand) && Wrapped.TryExecuteCommand(new CancelEntryAccountCommand(entry));
+            return Wrapped.TryExecuteCommand(new RevertAccountCommand(entry.RevertCommand)) &&
+                   Wrapped.TryExecuteCommand(new CancelEntryAccountCommand(entry));
         }
     }
 }

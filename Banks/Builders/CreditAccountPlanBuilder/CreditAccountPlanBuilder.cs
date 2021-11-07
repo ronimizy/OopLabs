@@ -6,14 +6,8 @@ namespace Banks.Builders.CreditAccountPlanBuilder
 {
     internal class CreditAccountPlanBuilder : ICreditLimitSelector, ICreditPercentageSelector, IBuilder<CreditAccountPlan>
     {
-        private readonly BanksDatabaseContext _databaseContext;
         private decimal? _limit;
         private decimal? _percentage;
-
-        public CreditAccountPlanBuilder(BanksDatabaseContext databaseContext)
-        {
-            _databaseContext = databaseContext;
-        }
 
         public ICreditPercentageSelector LimitedTo(decimal limit)
         {
@@ -31,8 +25,7 @@ namespace Banks.Builders.CreditAccountPlanBuilder
         {
             return new CreditAccountPlan(
                 _limit.ThrowIfNull(nameof(_limit)),
-                _percentage.ThrowIfNull(nameof(_percentage)),
-                _databaseContext);
+                _percentage.ThrowIfNull(nameof(_percentage)));
         }
     }
 }

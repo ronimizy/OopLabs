@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Banks.Entities;
-using Banks.ExceptionFactories;
 using Banks.Models;
-using Banks.Tools;
 
 namespace Banks.Plans
 {
@@ -13,9 +11,8 @@ namespace Banks.Plans
     {
         private readonly List<Client> _subscribers;
 
-        protected AccountPlan(BanksDatabaseContext databaseContext)
+        protected AccountPlan()
         {
-            DatabaseContext = databaseContext;
             _subscribers = new List<Client>();
         }
 
@@ -28,27 +25,7 @@ namespace Banks.Plans
         [NotMapped]
         public IReadOnlyCollection<Client> Subscribers => _subscribers;
 
-        protected BanksDatabaseContext DatabaseContext { get; }
-
-        public void Subscribe(Client client)
-        {
-            if (_subscribers.Contains(client))
-                throw AccountPlanExceptionFactory.AlreadySubscribedException(this, client);
-
-            _subscribers.Add(client);
-            DatabaseContext.AccountPlans.Update(this);
-            DatabaseContext.SaveChanges();
-        }
-
-        public void Unsubscribe(Client client)
-        {
-            if (!_subscribers.Contains(client))
-                throw AccountPlanExceptionFactory.NotSubscribedException(this, client);
-
-            _subscribers.Remove(client);
-            DatabaseContext.AccountPlans.Update(this);
-            DatabaseContext.SaveChanges();
-        }
+        public abstract override string ToString();
 
         public abstract bool Equals(AccountPlan? other);
 
@@ -57,5 +34,15 @@ namespace Banks.Plans
 
         public override int GetHashCode()
             => Id.GetHashCode();
+
+        internal void Subscribe(Client client)
+        {
+            _subscribers.Add(client);
+        }
+
+        internal void Unsubscribe(Client client)
+        {
+            _subscribers.Remove(client);
+        }
     }
 }

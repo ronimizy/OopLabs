@@ -89,6 +89,8 @@ namespace Banks.Services
                 .ThrowIfNull(MailingServiceExceptionFactory.MissingEmailException(user, emailId));
 
             email.Viewed = true;
+            _databaseContext.Emails.Update(email);
+            _databaseContext.SaveChanges();
             return email;
         }
     }

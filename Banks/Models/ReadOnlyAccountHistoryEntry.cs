@@ -12,5 +12,6 @@ namespace Banks.Models
         public abstract Info Info { get; protected init; }
         public abstract AccountCommand? RevertCommand { get; protected set; }
         public abstract bool Equals(ReadOnlyAccountHistoryEntry? other);
+        public abstract override string ToString();
     }
 }

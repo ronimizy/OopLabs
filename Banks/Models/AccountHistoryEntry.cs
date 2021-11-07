@@ -44,7 +44,7 @@ namespace Banks.Models
         }
 
         public override string ToString()
-            => $"[{Id}] - {State} - {Info}";
+            => $"{Id} - {State} - {Info.Title}";
 
         public override bool Equals(ReadOnlyAccountHistoryEntry? other)
             => other is not null && Id is not null && other.Id is not null && Id.Equals(other.Id);

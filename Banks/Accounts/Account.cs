@@ -38,7 +38,7 @@ namespace Banks.Accounts
             => Id.GetHashCode();
 
         public override string ToString()
-            => $"[{Id}] - {Balance}$";
+            => $"{Id} - {Balance}$";
 
         internal bool TryExecuteCommand(AccountCommand command)
             => TryExecuteCommand(command, out _);

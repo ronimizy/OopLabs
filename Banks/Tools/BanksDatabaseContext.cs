@@ -48,10 +48,15 @@ namespace Banks.Tools
             SuspiciousLimitPolicies.Load();
             Clients.Load();
             AccountPlans.Load();
-            Accounts.Load();
+            Accounts.Include("_history").Load();
             BankAccountCommands.Load();
             HistoryEntries.Load();
-            Banks.Load();
+            Banks
+                .Include("_debitAccountPlans")
+                .Include("_depositAccountPlans")
+                .Include("_creditAccountPlans")
+                .Include("_operatedAccounts")
+                .Load();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -89,13 +94,14 @@ namespace Banks.Tools
 
         private static void ConfigurePlans(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<AccountPlan>().HasMany<Client>("_subscribers");
+
             modelBuilder.Entity<DebitAccountPlan>().Property(p => p.Percentage).HasField("_percentage");
 
             modelBuilder.Entity<DepositAccountPlan>().HasMany("_levels");
-            modelBuilder.Entity<DepositPercentLevel>();
 
             modelBuilder.Entity<CreditAccountPlan>().Property(p => p.Percentage).HasField("_percentage");
-            modelBuilder.Entity<CreditAccountPlan>().Property(p => p.Limit).HasField("_limit");
+            modelBuilder.Entity<CreditAccountPlan>().Property(p => p.Limit);
         }
 
         private static void ConfigureCommands(ModelBuilder modelBuilder)
