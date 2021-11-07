@@ -41,7 +41,7 @@ namespace Banks.Tests
             _mailingDatabaseContext = new MailingDatabaseContext(mailingContextOptions);
             _banksContext = new BanksDatabaseContext(banksContextOptions, _chronometer, new MailingService(_mailingDatabaseContext));
 
-            var plan = new DebitAccountPlan(Percent, _banksContext);
+            var plan = new DebitAccountPlan(Percent);
 
             Client client = Client.BuildClient
                 .Called("Me", "eM")

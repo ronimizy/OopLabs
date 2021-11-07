@@ -9,6 +9,7 @@ using Banks.Tests.Mocks;
 using Banks.Tools;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
+using Utility.Extensions;
 
 namespace Banks.Tests
 {
@@ -76,17 +77,17 @@ namespace Banks.Tests
             var unlockDateTime = new DateTime(2020, 10, 2);
 
             Bank bank = _centralBank.RegisterBank(bankName, _client, new SuspiciousLimitPolicy(decimal.MaxValue));
-            IBuilder<DebitAccountPlan> debitPlanBuilder = _centralBank.BuildDebitPlan.WithDebitPercentage(0.1m);
-            IBuilder<DepositAccountPlan> depositPlanBuilder = _centralBank.BuildDepositPlan
+            IBuilder<DebitAccountPlan> debitPlanBuilder = DebitAccountPlan.BuildPlan.WithDebitPercentage(0.1m);
+            IBuilder<DepositAccountPlan> depositPlanBuilder = DepositAccountPlan.BuildPlan
                 .WithLevel(new DepositPercentLevel(baseDeposit, 0.05m))
                 .Builder;
-            IBuilder<CreditAccountPlan> creditPlanBuilder = _centralBank.BuildCreditPlan
+            IBuilder<CreditAccountPlan> creditPlanBuilder = CreditAccountPlan.BuildPlan
                 .LimitedTo(creditLimit)
                 .WithCommissionPercent(0.05m);
 
-            bank.RegisterDebitAccountPlan(debitPlanBuilder);
-            bank.RegisterDepositAccountPlan(depositPlanBuilder);
-            bank.RegisterCreditAccountPlan(creditPlanBuilder);
+            bank.RegisterDebitAccountPlan(_client, debitPlanBuilder);
+            bank.RegisterDepositAccountPlan(_client, depositPlanBuilder);
+            bank.RegisterCreditAccountPlan(_client, creditPlanBuilder);
 
             DebitAccountPlan debitPlan = bank.DebitAccountPlans.Single();
             DepositAccountPlan depositAccountPlan = bank.DepositAccountPlans.Single();
@@ -114,7 +115,7 @@ namespace Banks.Tests
             
             Assert.Throws<BanksException>(() => bank.WithdrawFunds(creditAccount, -creditLimit));
             
-            Assert.DoesNotThrow(() => bank.TransferFunds(creditAccount, debitAccount, -creditLimit / 2));
+            Assert.DoesNotThrow(() => bank.TransferFunds(creditAccount, debitAccount.Id.ThrowIfNull(nameof(debitAccount.Id)), -creditLimit / 2));
         }
     }
 }
