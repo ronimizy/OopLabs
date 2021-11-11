@@ -9,7 +9,6 @@ using Banks.Tests.Mocks;
 using Banks.Tools;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using Utility.Extensions;
 
 namespace Banks.Tests
 {
@@ -76,7 +75,7 @@ namespace Banks.Tests
             _chronometer.CurrentDateTime = new DateTime(2020, 9, 2);
             var unlockDateTime = new DateTime(2020, 10, 2);
 
-            Bank bank = _centralBank.RegisterBank(bankName, _client, new SuspiciousLimitPolicy(decimal.MaxValue));
+            IBank bank = _centralBank.RegisterBank(bankName, _client, new SuspiciousLimitPolicy(decimal.MaxValue));
             IBuilder<DebitAccountPlan> debitPlanBuilder = DebitAccountPlan.BuildPlan.WithDebitPercentage(0.1m);
             IBuilder<DepositAccountPlan> depositPlanBuilder = DepositAccountPlan.BuildPlan
                 .WithLevel(new DepositPercentLevel(baseDeposit, 0.05m))
@@ -115,7 +114,7 @@ namespace Banks.Tests
             
             Assert.Throws<BanksException>(() => bank.WithdrawFunds(creditAccount, -creditLimit));
             
-            Assert.DoesNotThrow(() => bank.TransferFunds(creditAccount, debitAccount.Id.ThrowIfNull(nameof(debitAccount.Id)), -creditLimit / 2));
+            Assert.DoesNotThrow(() => bank.TransferFunds(creditAccount, debitAccount, -creditLimit / 2));
         }
     }
 }
