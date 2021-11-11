@@ -13,10 +13,10 @@ namespace Banks.Console.ViewModels.Banking.AccountPlans
     public class DepositAccountPlanViewModel
     {
         private readonly Client _client;
-        private readonly Bank _bank;
+        private readonly IBank _bank;
         private readonly DepositAccountPlan _plan;
 
-        public DepositAccountPlanViewModel(Client client, Bank bank, DepositAccountPlan plan, INavigator navigator)
+        public DepositAccountPlanViewModel(Client client, IBank bank, DepositAccountPlan plan, INavigator navigator)
         {
             _client = client;
             _bank = bank;

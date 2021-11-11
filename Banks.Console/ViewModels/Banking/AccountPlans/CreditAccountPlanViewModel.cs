@@ -10,10 +10,10 @@ namespace Banks.Console.ViewModels.Banking.AccountPlans
     public class CreditAccountPlanViewModel
     {
         private readonly Client _client;
-        private readonly Bank _bank;
+        private readonly IBank _bank;
         private readonly CreditAccountPlan _plan;
 
-        public CreditAccountPlanViewModel(Client client, Bank bank, CreditAccountPlan plan, INavigator navigator)
+        public CreditAccountPlanViewModel(Client client, IBank bank, CreditAccountPlan plan, INavigator navigator)
         {
             _client = client;
             _bank = bank;

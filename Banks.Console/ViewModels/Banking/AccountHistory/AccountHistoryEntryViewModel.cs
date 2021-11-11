@@ -13,9 +13,9 @@ namespace Banks.Console.ViewModels.Banking.AccountHistory
         private readonly ReadOnlyAccountHistoryEntry _entry;
         private readonly Client _client;
         private readonly Account _account;
-        private readonly Bank _bank;
+        private readonly IBank _bank;
 
-        public AccountHistoryEntryViewModel(Client client, Bank bank, ReadOnlyAccountHistoryEntry entry, INavigator navigator, Account account)
+        public AccountHistoryEntryViewModel(Client client, IBank bank, ReadOnlyAccountHistoryEntry entry, INavigator navigator, Account account)
         {
             _client = client;
             _bank = bank;

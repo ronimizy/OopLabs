@@ -14,11 +14,13 @@ namespace Banks.Console.ViewModels.Banking.Accounts
     public class AccountViewModel
     {
         private readonly Client _client;
-        private readonly Bank _bank;
+        private readonly IBank _bank;
+        private readonly CentralBank _centralBank;
         private readonly Account _account;
 
-        public AccountViewModel(Client client, Bank bank, Account account, INavigator navigator)
+        public AccountViewModel(Client client, IBank bank, Account account, INavigator navigator, CentralBank centralBank)
         {
+            _centralBank = centralBank;
             _client = client.ThrowIfNull(nameof(client));
             _bank = bank.ThrowIfNull(nameof(bank));
             _account = account.ThrowIfNull(nameof(account));
@@ -70,7 +72,8 @@ namespace Banks.Console.ViewModels.Banking.Accounts
 
         private void TransferFunds(TransferFundsViewModel viewModel)
         {
-            _bank.TransferFunds(_account, viewModel.ReceiverId, viewModel.Amount);
+            Account receiver = _centralBank.GetAccount(viewModel.ReceiverId);
+            _bank.TransferFunds(_account, receiver, viewModel.Amount);
             Navigator.PopView();
         }
     }

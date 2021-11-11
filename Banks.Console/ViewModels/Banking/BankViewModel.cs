@@ -20,10 +20,10 @@ namespace Banks.Console.ViewModels.Banking
     {
         private readonly CentralBank _centralBank;
 
-        private readonly Bank _bank;
+        private readonly IBank _bank;
         private readonly Client _client;
 
-        public BankViewModel(CentralBank centralBank, Bank bank, Client client, INavigator navigator)
+        public BankViewModel(CentralBank centralBank, IBank bank, Client client, INavigator navigator)
         {
             _bank = bank.ThrowIfNull(nameof(bank));
             _client = client.ThrowIfNull(nameof(client));
@@ -35,7 +35,7 @@ namespace Banks.Console.ViewModels.Banking
         public string BankName => _bank.Name;
         public bool ClientIsOwner => _bank.Owner.Equals(_client);
 
-        public AccountsViewModel AccountsViewModel => new AccountsViewModel(_client, _bank, Navigator);
+        public AccountsViewModel AccountsViewModel => new AccountsViewModel(_client, _bank, Navigator, _centralBank);
 
         public SelectorViewModel<DebitAccountPlan> EnrollDebitAccountSelectorViewModel
             => new (Navigator, _bank.DebitAccountPlans, "Enroll Debit Account", EnrollDebitAccountAction);

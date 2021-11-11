@@ -9,10 +9,10 @@ namespace Banks.Console.ViewModels.Banking.AccountHistory
     public class AccountHistoryViewModel
     {
         private readonly Account _account;
-        private readonly Bank _bank;
+        private readonly IBank _bank;
         private readonly Client _client;
 
-        public AccountHistoryViewModel(Account account, Bank bank, Client client, INavigator navigator)
+        public AccountHistoryViewModel(Account account, IBank bank, Client client, INavigator navigator)
         {
             _account = account.ThrowIfNull(nameof(account));
             _bank = bank.ThrowIfNull(nameof(bank));
