@@ -8,7 +8,6 @@ using Banks.Plans;
 using Banks.Services;
 using Banks.Tools;
 using Microsoft.EntityFrameworkCore;
-using Utility.Extensions;
 
 const decimal baseDeposit = 1000;
 const decimal creditLimit = -2000;
@@ -40,7 +39,7 @@ IBuilder<Client> clientBuilder = Client.BuildClient
 
 Client client = centralBank.RegisterClient(clientBuilder);
 
-Bank bank = centralBank.RegisterBank($"My bank {DateTime.UtcNow}", client, new SuspiciousLimitPolicy(decimal.MaxValue));
+IBank bank = centralBank.RegisterBank($"My bank {DateTime.UtcNow}", client, new SuspiciousLimitPolicy(decimal.MaxValue));
 IBuilder<DebitAccountPlan> debitPlanBuilder = DebitAccountPlan.BuildPlan.WithDebitPercentage(0.1m);
 IBuilder<DepositAccountPlan> depositPlanBuilder = DepositAccountPlan.BuildPlan
     .WithLevel(new DepositPercentLevel(baseDeposit, 0.05m))
@@ -67,4 +66,4 @@ bank.AccrueFunds(creditAccount, baseDeposit);
 bank.WithdrawFunds(debitAccount, baseDeposit);
 bank.WithdrawFunds(creditAccount, baseDeposit);
 bank.WithdrawFunds(creditAccount, -creditLimit / 10);
-bank.TransferFunds(creditAccount, debitAccount.Id.ThrowIfNull(nameof(debitAccount.Id)), -creditLimit / 2);
+bank.TransferFunds(creditAccount, debitAccount, -creditLimit / 2);

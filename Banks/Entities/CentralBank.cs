@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Banks.Builders.CreditAccountPlanBuilder;
-using Banks.Builders.DebitAccountPlanBuilder;
-using Banks.Builders.DepositAccountPlanBuilder;
+using Banks.Accounts;
 using Banks.Chronometers;
+using Banks.DatabaseWrappers;
 using Banks.ExceptionFactories;
 using Banks.Models;
 using Banks.Tools;
@@ -20,7 +20,7 @@ namespace Banks.Entities
             _databaseContext = databaseContext.ThrowIfNull(nameof(databaseContext));
         }
 
-        public IReadOnlyCollection<Bank> Banks => _databaseContext.Banks.ToList();
+        public IReadOnlyCollection<IBank> Banks => _databaseContext.Banks.Select(b => new BankDatabaseWrapper(_databaseContext, b)).ToList();
         public IChronometer Chronometer => _databaseContext.Chronometer;
 
         public Client RegisterClient(IBuilder<Client> clientBuilder)
@@ -80,7 +80,7 @@ namespace Banks.Entities
             _databaseContext.SaveChanges();
         }
 
-        public Bank RegisterBank(string name, Client owner, SuspiciousLimitPolicy limitPolicy)
+        public IBank RegisterBank(string name, Client owner, SuspiciousLimitPolicy limitPolicy)
         {
             name.ThrowIfNull(nameof(name));
             owner.ThrowIfNull(nameof(owner));
@@ -96,7 +96,7 @@ namespace Banks.Entities
             _databaseContext.Banks.Add(bank);
             _databaseContext.SaveChanges();
 
-            return bank;
+            return new BankDatabaseWrapper(_databaseContext, bank);
         }
 
         public void AccruePercents()
@@ -104,7 +104,13 @@ namespace Banks.Entities
             foreach (Bank bank in _databaseContext.Banks)
             {
                 bank.AccruePercents();
+                _databaseContext.Banks.Update(bank);
             }
+
+            _databaseContext.SaveChanges();
         }
+
+        public Account GetAccount(Guid id)
+            => _databaseContext.Accounts.Find(id).ThrowIfNull(nameof(Account));
     }
 }
