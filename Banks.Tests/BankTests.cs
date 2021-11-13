@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
 using Banks.Accounts;
+using Banks.Commands.BankAccountCommands;
 using Banks.Entities;
 using Banks.Models;
+using Banks.Notification;
 using Banks.Plans;
-using Banks.Services;
 using Banks.Tests.Mocks;
 using Banks.Tools;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ namespace Banks.Tests
     [TestFixture]
     public class BankTests : IDisposable
     {
+        private const string BankName = "My Bank";
         private ChronometerMock _chronometer = null!;
 
         private BanksDatabaseContext _banksDatabaseContext = null!;
@@ -24,6 +26,7 @@ namespace Banks.Tests
         private MailingService _mailingService = null!;
 
         private Client _client = null!;
+        private IBank _bank = null!;
 
         [SetUp]
         public void Setup()
@@ -54,11 +57,14 @@ namespace Banks.Tests
                 .Builder;
 
             _client = _centralBank.RegisterClient(clientBuilder);
+            _bank = _centralBank.RegisterBank(BankName, _client, new SuspiciousLimitPolicy(decimal.MaxValue));
         }
 
         [TearDown]
         public void Teardown()
         {
+            _banksDatabaseContext.Database.EnsureDeleted();
+            _mailingDatabaseContext.Database.EnsureDeleted();
             _banksDatabaseContext.Dispose();
             _mailingDatabaseContext.Dispose();
         }
@@ -68,14 +74,12 @@ namespace Banks.Tests
         [Test]
         public void AccountsTest_AllTypesOfAccountsCreated_AllTypesOfOperationsExecuted()
         {
-            const string bankName = "My Bank";
             const decimal baseDeposit = 1000;
             const decimal creditLimit = -2000;
 
             _chronometer.CurrentDateTime = new DateTime(2020, 9, 2);
             var unlockDateTime = new DateTime(2020, 10, 2);
-
-            IBank bank = _centralBank.RegisterBank(bankName, _client, new SuspiciousLimitPolicy(decimal.MaxValue));
+            
             IBuilder<DebitAccountPlan> debitPlanBuilder = DebitAccountPlan.BuildPlan.WithDebitPercentage(0.1m);
             IBuilder<DepositAccountPlan> depositPlanBuilder = DepositAccountPlan.BuildPlan
                 .WithLevel(new DepositPercentLevel(baseDeposit, 0.05m))
@@ -84,37 +88,62 @@ namespace Banks.Tests
                 .LimitedTo(creditLimit)
                 .WithCommissionPercent(0.05m);
 
-            bank.RegisterDebitAccountPlan(_client, debitPlanBuilder);
-            bank.RegisterDepositAccountPlan(_client, depositPlanBuilder);
-            bank.RegisterCreditAccountPlan(_client, creditPlanBuilder);
+            _bank.RegisterDebitAccountPlan(_client, debitPlanBuilder);
+            _bank.RegisterDepositAccountPlan(_client, depositPlanBuilder);
+            _bank.RegisterCreditAccountPlan(_client, creditPlanBuilder);
 
-            DebitAccountPlan debitPlan = bank.DebitAccountPlans.Single();
-            DepositAccountPlan depositAccountPlan = bank.DepositAccountPlans.Single();
-            CreditAccountPlan creditAccountPlan = bank.CreditAccountPlans.Single();
+            DebitAccountPlan debitPlan = _bank.DebitAccountPlans.Single();
+            DepositAccountPlan depositAccountPlan = _bank.DepositAccountPlans.Single();
+            CreditAccountPlan creditAccountPlan = _bank.CreditAccountPlans.Single();
 
-            Account debitAccount = bank.EnrollDebitAccount(_client, debitPlan);
-            Account depositAccount = bank.EnrollDepositAccount(_client, depositAccountPlan, unlockDateTime, baseDeposit);
-            Account creditAccount = bank.EnrollCreditAccount(_client, creditAccountPlan);
+            Account debitAccount = _bank.EnrollDebitAccount(_client, debitPlan);
+            Account depositAccount = _bank.EnrollDepositAccount(_client, depositAccountPlan, unlockDateTime, baseDeposit);
+            Account creditAccount = _bank.EnrollCreditAccount(_client, creditAccountPlan);
             
-            Assert.DoesNotThrow(() => bank.AccrueFunds(debitAccount, baseDeposit));
-            Assert.DoesNotThrow(() => bank.AccrueFunds(depositAccount, baseDeposit));
-            Assert.DoesNotThrow(() => bank.AccrueFunds(creditAccount, baseDeposit));
+            Assert.DoesNotThrow(() => _bank.AccrueFunds(debitAccount, baseDeposit));
+            Assert.DoesNotThrow(() => _bank.AccrueFunds(depositAccount, baseDeposit));
+            Assert.DoesNotThrow(() => _bank.AccrueFunds(creditAccount, baseDeposit));
             
-            Assert.DoesNotThrow(() => bank.WithdrawFunds(debitAccount, baseDeposit));
-            Assert.Throws<BanksException>(() => bank.WithdrawFunds(depositAccount, baseDeposit));
-            Assert.DoesNotThrow(() => bank.WithdrawFunds(creditAccount, baseDeposit));
+            Assert.DoesNotThrow(() => _bank.WithdrawFunds(debitAccount, baseDeposit));
+            Assert.Throws<BanksException>(() => _bank.WithdrawFunds(depositAccount, baseDeposit));
+            Assert.DoesNotThrow(() => _bank.WithdrawFunds(creditAccount, baseDeposit));
 
             _chronometer.CurrentDateTime = unlockDateTime;
             
-            Assert.DoesNotThrow(() => bank.WithdrawFunds(depositAccount, 2 * baseDeposit));
+            Assert.DoesNotThrow(() => _bank.WithdrawFunds(depositAccount, 2 * baseDeposit));
 
-            Assert.Throws<BanksException>(() => bank.WithdrawFunds(debitAccount, baseDeposit));
-            Assert.Throws<BanksException>(() => bank.WithdrawFunds(depositAccount, baseDeposit));
-            Assert.DoesNotThrow(() => bank.WithdrawFunds(creditAccount, -creditLimit / 10));
+            Assert.Throws<BanksException>(() => _bank.WithdrawFunds(debitAccount, baseDeposit));
+            Assert.Throws<BanksException>(() => _bank.WithdrawFunds(depositAccount, baseDeposit));
+            Assert.DoesNotThrow(() => _bank.WithdrawFunds(creditAccount, -creditLimit / 10));
             
-            Assert.Throws<BanksException>(() => bank.WithdrawFunds(creditAccount, -creditLimit));
+            Assert.Throws<BanksException>(() => _bank.WithdrawFunds(creditAccount, -creditLimit));
             
-            Assert.DoesNotThrow(() => bank.TransferFunds(creditAccount, debitAccount, -creditLimit / 2));
+            Assert.DoesNotThrow(() => _bank.TransferFunds(creditAccount, debitAccount, -creditLimit / 2));
+        }
+
+        [Test]
+        public void RevertCommandTest_AccrualCommandExecuted_AccrualCommandReverted_OperationCanceled_RevertOperationLogged_CancellationLogged()
+        {
+            const decimal amount = 1000m;
+            const decimal percent = 0.10m;
+
+            var date = new DateTime(2020, 1, 1);
+            
+            DebitAccountPlan plan = _bank.RegisterDebitAccountPlan(_client, DebitAccountPlan.BuildPlan.WithDebitPercentage(percent));
+            Account account = _bank.EnrollDebitAccount(_client, plan);
+
+            _chronometer.CurrentDateTime = date;
+            _bank.AccrueFunds(account, amount);
+
+            ReadOnlyAccountHistoryEntry entry = account.History.Single();
+
+            Assert.NotNull(entry.Id);
+            Assert.DoesNotThrow(() => _bank.CancelOperation(_client, account, entry));
+
+            Assert.AreEqual(3, account.History.Count);
+            Assert.AreEqual(OperationState.Canceled, account.History.ElementAt(0).State);
+            Assert.AreEqual(nameof(WithdrawalAccountCommand), account.History.ElementAt(1).Info.Title);
+            Assert.AreEqual(nameof(CancelEntryAccountCommand), account.History.ElementAt(2).Info.Title);
         }
     }
 }
