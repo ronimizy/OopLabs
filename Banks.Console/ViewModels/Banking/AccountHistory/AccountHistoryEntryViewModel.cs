@@ -4,7 +4,6 @@ using Banks.Entities;
 using Banks.Models;
 using Spectre.Mvvm.Interfaces;
 using Spectre.Mvvm.Models;
-using Utility.Extensions;
 
 namespace Banks.Console.ViewModels.Banking.AccountHistory
 {
@@ -29,11 +28,11 @@ namespace Banks.Console.ViewModels.Banking.AccountHistory
         public DateTime ExecutedDateTime => _entry.ExecutedTime;
         public decimal RemainingBalance => _entry.RemainingBalance;
         public string Description => _entry.Info.Description;
-        public bool CanCancel => _client.Equals(_bank.Owner) && _entry.RevertCommand is not null;
+        public bool CanCancel => _client.Equals(_bank.Owner);
 
         public NavigationElement CancelElement => new NavigationElement("Cancel", n =>
         {
-            _bank.CancelOperation(_client, _account, _entry.Id.ThrowIfNull(nameof(_entry.Id)));
+            _bank.CancelOperation(_client, _account, _entry);
             n.PopView();
         });
     }
