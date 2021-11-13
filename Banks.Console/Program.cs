@@ -3,7 +3,7 @@ using Banks.Console.Tools;
 using Banks.Console.ViewModels;
 using Banks.Console.Views;
 using Banks.Entities;
-using Banks.Services;
+using Banks.Notification;
 using Banks.Tools;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Mvvm;

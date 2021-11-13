@@ -2,7 +2,7 @@ using Banks.Console.Views;
 using Banks.Console.Views.Mailing;
 using Banks.Entities;
 using Banks.Models;
-using Banks.Services;
+using Banks.Notification;
 using Spectre.Mvvm.Interfaces;
 using Spectre.Mvvm.Models;
 using Utility.Extensions;

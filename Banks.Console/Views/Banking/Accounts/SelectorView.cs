@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using Banks.Console.ViewModels;
-using Banks.Console.ViewModels.Banking.Accounts;
-using Banks.Plans;
 using Spectre.Mvvm.Components;
 using Spectre.Mvvm.Views;
 

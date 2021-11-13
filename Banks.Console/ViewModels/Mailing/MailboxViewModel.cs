@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Banks.Entities;
 using Banks.Models;
-using Banks.Services;
+using Banks.Notification;
 using Spectre.Mvvm.Interfaces;
 using Utility.Extensions;
 
