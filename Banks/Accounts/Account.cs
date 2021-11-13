@@ -44,6 +44,5 @@ namespace Banks.Accounts
             => TryExecuteCommand(command, out _);
 
         internal abstract bool TryExecuteCommand(AccountCommand command, out DateTime? executedDateTime);
-        internal abstract bool TryCancelOperation(Guid operationId);
     }
 }

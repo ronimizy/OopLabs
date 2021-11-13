@@ -7,7 +7,7 @@ using Banks.Models;
 using Banks.Tools;
 using Utility.Extensions;
 
-namespace Banks.Services
+namespace Banks.Notification
 {
     public class MailingService : IClientNotificationService
     {

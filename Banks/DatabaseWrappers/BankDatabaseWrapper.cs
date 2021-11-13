@@ -146,9 +146,9 @@ namespace Banks.DatabaseWrappers
             _databaseContext.SaveChanges();
         }
 
-        public void CancelOperation(Client client, Account account, Guid operationId)
+        public void CancelOperation(Client client, Account account, ReadOnlyAccountHistoryEntry entry)
         {
-            _bank.CancelOperation(client, account, operationId);
+            _bank.CancelOperation(client, account, entry);
             _databaseContext.Accounts.Update(account);
             _databaseContext.SaveChanges();
         }

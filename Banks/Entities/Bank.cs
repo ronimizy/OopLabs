@@ -4,11 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Banks.Accounts;
+using Banks.Commands;
 using Banks.Commands.BankAccountCommands;
 using Banks.ExceptionFactories;
 using Banks.Models;
+using Banks.Notification;
+using Banks.OperationCancellation;
 using Banks.Plans;
-using Banks.Services;
 using Banks.Tools;
 using Utility.Extensions;
 
@@ -18,6 +20,7 @@ namespace Banks.Entities
     {
         private readonly AccountFactory _accountFactory;
         private readonly IClientNotificationService _notificationService;
+        private readonly OperationCancellationService _cancellationService;
 
         private readonly List<Account> _operatedAccounts;
 
@@ -25,13 +28,20 @@ namespace Banks.Entities
         private readonly List<DepositAccountPlan> _depositAccountPlans;
         private readonly List<CreditAccountPlan> _creditAccountPlans;
 
-        public Bank(string name, Client owner, SuspiciousLimitPolicy limitPolicy, BanksDatabaseContext databaseContext)
+        public Bank(
+            string name,
+            Client owner,
+            SuspiciousLimitPolicy limitPolicy,
+            AccountFactory accountFactory,
+            IClientNotificationService notificationService,
+            OperationCancellationService cancellationService)
         {
             Name = name.ThrowIfNull(nameof(name));
             Owner = owner.ThrowIfNull(nameof(owner));
             SuspiciousLimitPolicy = limitPolicy.ThrowIfNull(nameof(limitPolicy));
-            _accountFactory = databaseContext.AccountFactory.ThrowIfNull(nameof(databaseContext.AccountFactory));
-            _notificationService = databaseContext.NotificationService.ThrowIfNull(nameof(databaseContext.NotificationService));
+            _accountFactory = accountFactory;
+            _notificationService = notificationService;
+            _cancellationService = cancellationService;
             _operatedAccounts = new List<Account>();
             _debitAccountPlans = new List<DebitAccountPlan>();
             _depositAccountPlans = new List<DepositAccountPlan>();
@@ -42,6 +52,7 @@ namespace Banks.Entities
         private Bank(BanksDatabaseContext context)
 #pragma warning restore 8618
         {
+            _cancellationService = context.OperationCancellationService;
             _accountFactory = context.AccountFactory;
             _notificationService = context.NotificationService;
         }
@@ -237,8 +248,10 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignAccountException(this, account);
 
             var command = new AccrualAccountCommand(amount);
-            if (!account.TryExecuteCommand(command))
+            if (!account.TryExecuteCommand(command, out DateTime? executedDateTime))
                 throw BankExceptionFactory.FailedOperationException(this, account, command.Info);
+
+            LogCancellationEntry(account, executedDateTime.ThrowIfNull(nameof(executedDateTime)), command);
         }
 
         public void WithdrawFunds(Account account, decimal amount)
@@ -249,8 +262,10 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignAccountException(this, account);
 
             var command = new WithdrawalAccountCommand(amount);
-            if (!account.TryExecuteCommand(command))
+            if (!account.TryExecuteCommand(command, out DateTime? executedDateTime))
                 throw BankExceptionFactory.FailedOperationException(this, account, command.Info);
+
+            LogCancellationEntry(account, executedDateTime.ThrowIfNull(nameof(executedDateTime)), command);
         }
 
         public void TransferFunds(Account origin, Account destination, decimal amount)
@@ -261,11 +276,13 @@ namespace Banks.Entities
                 throw BankExceptionFactory.ForeignAccountException(this, origin);
 
             var command = new TransferringAccountCommand(amount, origin, destination);
-            if (!origin.TryExecuteCommand(command))
+            if (!origin.TryExecuteCommand(command, out DateTime? executedDateTime))
                 throw BankExceptionFactory.FailedOperationException(this, origin, command.Info);
+
+            LogCancellationEntry(origin, executedDateTime.ThrowIfNull(nameof(executedDateTime)), command);
         }
 
-        public void CancelOperation(Client client, Account account, Guid operationId)
+        public void CancelOperation(Client client, Account account, ReadOnlyAccountHistoryEntry entry)
         {
             client.ThrowIfNull(nameof(client));
             account.ThrowIfNull(nameof(account));
@@ -274,8 +291,15 @@ namespace Banks.Entities
             if (!_operatedAccounts.Contains(account))
                 throw BankExceptionFactory.ForeignAccountException(this, account);
 
-            if (!account.TryCancelOperation(operationId))
-                throw BankExceptionFactory.FailedToCancelOperationException(account, operationId);
+            if (!account.History.Any(e => e.Equals(entry)))
+                throw AccountExceptionFactory.NotContainingHistoryEntryException(account, entry);
+
+            AccountCommand revertCommand = _cancellationService
+                .GetCancellationCommand(entry)
+                .ThrowIfNull(BankExceptionFactory.FailedToCancelOperationException(account, entry));
+
+            if (!account.TryExecuteCommand(revertCommand) || !account.TryExecuteCommand(new CancelEntryAccountCommand(entry)))
+                throw BankExceptionFactory.FailedToCancelOperationException(account, entry);
         }
 
         public void SubscribeToPlanUpdates(Client client, AccountPlan plan)
@@ -335,6 +359,15 @@ namespace Banks.Entities
         {
             if (!client.Equals(Owner))
                 throw BankExceptionFactory.InsufficientPermissionException(client);
+        }
+
+        private void LogCancellationEntry(Account account, DateTime executedDateTime, AccountCommand command)
+        {
+            ReadOnlyAccountHistoryEntry historyEntry = account.History.Last(e => e.ExecutedTime.Equals(executedDateTime));
+            AccountCommand revertCommand = command.RevertCommand.ThrowIfNull(nameof(command.RevertCommand));
+            var cancellationEntry = new OperationCancellationEntry(historyEntry, revertCommand);
+
+            _cancellationService.AddCancellationEntry(cancellationEntry);
         }
     }
 }

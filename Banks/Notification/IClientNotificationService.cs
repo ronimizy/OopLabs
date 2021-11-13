@@ -1,7 +1,7 @@
 using Banks.Entities;
 using Banks.Models;
 
-namespace Banks.Services
+namespace Banks.Notification
 {
     public interface IClientNotificationService
     {

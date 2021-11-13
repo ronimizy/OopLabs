@@ -11,13 +11,11 @@ namespace Banks.Tools
 {
     public class AccountFactory
     {
-        private readonly BanksDatabaseContext _context;
         private readonly IChronometer _chronometer;
 
-        public AccountFactory(BanksDatabaseContext context)
+        public AccountFactory(IChronometer chronometer)
         {
-            _context = context.ThrowIfNull(nameof(context));
-            _chronometer = context.Chronometer.ThrowIfNull(nameof(context.Chronometer));
+            _chronometer = chronometer.ThrowIfNull(nameof(chronometer));
         }
 
         public Account CreateDebitAccount(Client client, DebitAccountPlan plan, SuspiciousLimitPolicy limitPolicy)
@@ -31,8 +29,6 @@ namespace Banks.Tools
             account = new DebitAccountDecorator(plan, account, _chronometer);
             account = new SuspiciousLimitingAccountDecorator(account, limitPolicy, _chronometer);
             account = new CommandLoggingAccountProxy(account, _chronometer);
-            account = new CancelingAccountProxy(account, _chronometer);
-            account = new SavingAccountProxy(account, _context);
 
             return account;
         }
@@ -50,8 +46,6 @@ namespace Banks.Tools
             account = new DepositAccountDecorator(deposit, plan, account, _chronometer);
             account = new SuspiciousLimitingAccountDecorator(account, limitPolicy, _chronometer);
             account = new CommandLoggingAccountProxy(account, _chronometer);
-            account = new CancelingAccountProxy(account, _chronometer);
-            account = new SavingAccountProxy(account, _context);
 
             return account;
         }
@@ -66,8 +60,6 @@ namespace Banks.Tools
             account = new CreditAccountDecorator(plan, account, _chronometer);
             account = new SuspiciousLimitingAccountDecorator(account, limitPolicy, _chronometer);
             account = new CommandLoggingAccountProxy(account, _chronometer);
-            account = new CancelingAccountProxy(account, _chronometer);
-            account = new SavingAccountProxy(account, _context);
 
             return account;
         }

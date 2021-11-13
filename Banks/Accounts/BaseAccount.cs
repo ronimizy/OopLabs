@@ -5,7 +5,6 @@ using System.Linq;
 using Banks.AccountInterfaces;
 using Banks.Chronometers;
 using Banks.Commands;
-using Banks.Commands.BankAccountCommands;
 using Banks.Entities;
 using Banks.ExceptionFactories;
 using Banks.Models;
@@ -91,16 +90,6 @@ namespace Banks.Accounts
         {
             command.ThrowIfNull(nameof(command));
             return command.TryExecute(this, _chronometer, out executedDateTime);
-        }
-
-        internal override bool TryCancelOperation(Guid operationId)
-        {
-            AccountHistoryEntry? entry = _history.SingleOrDefault(e => e.Id.Equals(operationId));
-
-            if (entry?.State is OperationState.Canceled || entry?.RevertCommand is null)
-                return false;
-
-            return TryExecuteCommand(entry.RevertCommand) && TryExecuteCommand(new CancelEntryAccountCommand(entry));
         }
     }
 }

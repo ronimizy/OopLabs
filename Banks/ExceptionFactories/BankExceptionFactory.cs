@@ -32,9 +32,6 @@ namespace Banks.ExceptionFactories
         public static BanksException UnregisteredPlanException()
             => new BanksException("Given plan is not registered in the system");
 
-        public static BanksException UnknownAccountException(Guid id)
-            => new BanksException($"Account with id {id} in unknown");
-
         public static BanksException ForeignPlanException(Bank bank, Guid planId)
             => new BanksException($"Bank {bank}, does not have a plan with id {planId}");
 
@@ -51,8 +48,8 @@ namespace Banks.ExceptionFactories
         public static BanksException ExistingNameBankException(string name)
             => new BanksException($"Bank called {name} already exists");
 
-        public static BanksException FailedToCancelOperationException(Account account, Guid operationId)
-            => new BanksException($"Failed to cancel an operation with id {operationId} at account {account}");
+        public static BanksException FailedToCancelOperationException(Account account, ReadOnlyAccountHistoryEntry entry)
+            => new BanksException($"Failed to cancel an operation {entry} at account {account}");
 
         public static BanksException CannotSubscribeException(AccountPlan plan, Client client)
             => new BanksException($"Client {client} cannot subscribe to account plan {plan}");

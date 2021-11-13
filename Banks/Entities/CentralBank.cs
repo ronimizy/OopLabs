@@ -92,7 +92,14 @@ namespace Banks.Entities
             if (_databaseContext.Banks.ToList().Any(b => b.Name.Equals(name)))
                 throw BankExceptionFactory.ExistingNameBankException(name);
 
-            var bank = new Bank(name, owner, limitPolicy, _databaseContext);
+            var bank = new Bank(
+                name,
+                owner,
+                limitPolicy,
+                _databaseContext.AccountFactory,
+                _databaseContext.NotificationService,
+                _databaseContext.OperationCancellationService);
+
             _databaseContext.Banks.Add(bank);
             _databaseContext.SaveChanges();
 

@@ -5,8 +5,9 @@ using Banks.Commands;
 using Banks.Commands.BankAccountCommands;
 using Banks.Entities;
 using Banks.Models;
+using Banks.Notification;
+using Banks.OperationCancellation;
 using Banks.Plans;
-using Banks.Services;
 using Microsoft.EntityFrameworkCore;
 using Utility.Extensions;
 
@@ -18,8 +19,9 @@ namespace Banks.Tools
             : base(options)
         {
             NotificationService = notificationService.ThrowIfNull(nameof(notificationService));
+            OperationCancellationService = new OperationCancellationService(this);
             Chronometer = chronometer.ThrowIfNull(nameof(chronometer));
-            AccountFactory = new AccountFactory(this);
+            AccountFactory = new AccountFactory(Chronometer);
 
             Database.EnsureCreated();
         }
@@ -34,12 +36,14 @@ namespace Banks.Tools
         internal DbSet<AccountCommand> BankAccountCommands { get; private set; } = null!;
         internal DbSet<SuspiciousLimitPolicy> SuspiciousLimitPolicies { get; private set; } = null!;
         internal DbSet<PassportData> PassportData { get; private set; } = null!;
+        internal DbSet<OperationCancellationEntry> OperationCancellationEntries { get; private set; } = null!;
 
         internal DbSet<Info> Infos { get; private set; } = null!;
 
         internal IChronometer Chronometer { get; }
         internal AccountFactory AccountFactory { get; }
         internal IClientNotificationService NotificationService { get; }
+        internal OperationCancellationService OperationCancellationService { get; }
 
         public void Load()
         {
@@ -56,6 +60,8 @@ namespace Banks.Tools
                 .Include("_creditAccountPlans")
                 .Include("_operatedAccounts")
                 .Load();
+
+            OperationCancellationEntries.Include(e => e.Entry).Load();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -118,7 +124,6 @@ namespace Banks.Tools
         {
             modelBuilder.Entity<Account>()
                 .HasDiscriminator<string>("Discriminator")
-                .HasValue<CancelingAccountProxy>(nameof(CancelingAccountProxy))
                 .HasValue<CommandLoggingAccountProxy>(nameof(CommandLoggingAccountProxy));
 
             modelBuilder.Entity<BaseAccount>().Property(a => a.Balance).HasField("_balance");
@@ -132,7 +137,6 @@ namespace Banks.Tools
             modelBuilder.Entity<TimeLockingAccountDecorator>();
             modelBuilder.Entity<CreditAccountDecorator>().HasOne<CreditAccountPlan>("_plan");
             modelBuilder.Entity<SuspiciousLimitingAccountDecorator>();
-            modelBuilder.Entity<SavingAccountProxy>();
         }
     }
 }

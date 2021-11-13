@@ -34,7 +34,7 @@ namespace Banks.Entities
         void AccrueFunds(Account account, decimal amount);
         void WithdrawFunds(Account account, decimal amount);
         void TransferFunds(Account origin, Account destination, decimal amount);
-        void CancelOperation(Client client, Account account, Guid operationId);
+        void CancelOperation(Client client, Account account, ReadOnlyAccountHistoryEntry entry);
         void SubscribeToPlanUpdates(Client client, AccountPlan plan);
         void UnsubscribeFromPlanUpdates(Client client, AccountPlan plan);
 

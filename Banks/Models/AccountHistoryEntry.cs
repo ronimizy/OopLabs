@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using Banks.Commands;
 using Banks.ExceptionFactories;
 using Utility.Extensions;
 
@@ -11,14 +10,12 @@ namespace Banks.Models
         public AccountHistoryEntry(
             DateTime executedTime,
             decimal remainingBalance,
-            Info info,
-            AccountCommand? revertCommand)
+            Info info)
         {
             ExecutedTime = executedTime;
             RemainingBalance = remainingBalance;
             State = OperationState.Valid;
             Info = info.ThrowIfNull(nameof(info));
-            RevertCommand = revertCommand;
         }
 
 #pragma warning disable 8618
@@ -32,7 +29,6 @@ namespace Banks.Models
         public override decimal RemainingBalance { get; protected init; }
         public override OperationState State { get; protected set; }
         public override Info Info { get; protected init; }
-        public override AccountCommand? RevertCommand { get; protected set; }
 
         public void Cancel()
         {
@@ -40,7 +36,6 @@ namespace Banks.Models
                 throw AccountExceptionFactory.AlreadyCanceledEntryException(this);
 
             State = OperationState.Canceled;
-            RevertCommand = null;
         }
 
         public override string ToString()

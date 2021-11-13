@@ -41,7 +41,7 @@ namespace Banks.Extensions
                 }
 
                 lastEntry = new AccountHistoryEntry(
-                    lastEntry.ExecutedTime.Date + TimeSpan.FromDays(1), lastEntry.RemainingBalance, lastEntry.Info, null);
+                    lastEntry.ExecutedTime.Date + TimeSpan.FromDays(1), lastEntry.RemainingBalance, lastEntry.Info);
                 yield return lastEntry;
             }
         }

@@ -25,7 +25,7 @@ namespace Banks.Accounts.Wrappers
                 return false;
 
             executedDateTime = executedDateTime.ThrowIfNull(nameof(executedDateTime));
-            var entry = new AccountHistoryEntry(executedDateTime.Value, Balance, command.Info, command.RevertCommand);
+            var entry = new AccountHistoryEntry(executedDateTime.Value, Balance, command.Info);
             var logCommand = new LogEntryAccountCommand(entry);
 
             if (!Wrapped.TryExecuteCommand(logCommand))

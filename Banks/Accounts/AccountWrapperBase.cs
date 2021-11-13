@@ -49,8 +49,5 @@ namespace Banks.Accounts
             executedDateTime = null;
             return command.TryExecute(this, Chronometer, out executedDateTime) || Wrapped.TryExecuteCommand(command, out executedDateTime);
         }
-
-        internal override bool TryCancelOperation(Guid operationId)
-            => Wrapped.TryCancelOperation(operationId);
     }
 }
