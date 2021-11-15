@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Backups.Repositories;
 using Backups.Tools;
 using Utility.Extensions;
@@ -9,18 +10,24 @@ namespace Backups.Tests.Mocks
 {
     public class InMemoryRepository : Repository
     {
-        public InMemoryRepository()
-            : base("Memory")
-        {
-            Root = new FolderNode(Id);
-        }
+        public InMemoryRepository(string id = "")
+            : base(id) { }
 
-        public interface INode : IDisposable
+        public interface INode
         {
             public string Name { get; }
         }
 
-        public FolderNode Root { get; }
+        public static FolderNode Root { get; private set; } = new FolderNode("Memory");
+
+        public static void Clear()
+        {
+            Root.Dispose();
+            Root = new FolderNode("Memory");
+        }
+
+        public override Repository GetSubRepositoryAt(string path)
+            => new InMemoryRepository($"{Id}{BackupConfiguration.PathDelimiter}{path}");
 
         public override bool Exists(string path)
             => Find(ParsePath(path)).Node is not null;
@@ -37,8 +44,9 @@ namespace Backups.Tests.Mocks
 
             if (!parent.Children.Remove(node.Name))
                 throw new InvalidOperationException("Unexpected behavior");
-            
-            node.Dispose();
+
+            if (node is IDisposable disposable)
+                disposable.Dispose();
         }
 
         public override void Write(string path, Stream data)
@@ -71,21 +79,29 @@ namespace Backups.Tests.Mocks
         {
             (INode? node, FolderNode? _) = Find(ParsePath(path), true);
 
-            if (node is DataNode dataNode)
-                return dataNode.Stream;
+            if (node is not DataNode dataNode)
+                throw new InvalidOperationException("Node is not a data node");
 
-            throw new InvalidOperationException("Node is not a data node");
+            var ms = new MemoryStream();
+            dataNode.Stream.Position = 0;
+            dataNode.Stream.CopyTo(ms);
+            ms.Position = 0;
+
+            return ms;
         }
 
         public override bool Equals(Repository? other)
             => other is InMemoryRepository && other.Id.Equals(Id);
 
-        private static IReadOnlyCollection<string> ParsePath(string path)
+        private IReadOnlyCollection<string> ParsePath(string path)
         {
             if (string.IsNullOrEmpty(path))
                 return Array.Empty<string>();
 
-            string[] split = path.Split(BackupConfiguration.PathDelimiter);
+            string[] split = $"{Id}{BackupConfiguration.PathDelimiter}{path}"
+                .Split(BackupConfiguration.PathDelimiter)
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToArray();
             bool fileFound = false;
 
             foreach (var str in split)
@@ -116,7 +132,7 @@ namespace Backups.Tests.Mocks
         private static INode CreateNode(string name)
             => IsDirectory(name) ? new FolderNode(name) : new DataNode(name);
 
-        private (INode? Node, FolderNode? Parent) Find(IReadOnlyCollection<string> path, bool creating = false)
+        private static (INode? Node, FolderNode? Parent) Find(IReadOnlyCollection<string> path, bool creating = false)
         {
             FolderNode? parent = null;
             INode node = Root;
@@ -141,7 +157,7 @@ namespace Backups.Tests.Mocks
             return (node, parent);
         }
 
-        public sealed class DataNode : INode
+        public sealed class DataNode : INode, IDisposable
         {
             public DataNode(string name)
             {
@@ -158,7 +174,7 @@ namespace Backups.Tests.Mocks
                 => Stream.Dispose();
         }
 
-        public sealed class FolderNode : INode
+        public sealed class FolderNode : INode, IDisposable
         {
             public FolderNode(string name)
             {
@@ -173,7 +189,8 @@ namespace Backups.Tests.Mocks
             {
                 foreach (var (_, value) in Children)
                 {
-                    value.Dispose();
+                    if (value is IDisposable disposable)
+                        disposable.Dispose();
                 }
             }
         }

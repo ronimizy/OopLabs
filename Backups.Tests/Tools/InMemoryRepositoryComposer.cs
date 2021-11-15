@@ -3,19 +3,12 @@ using Spectre.Console;
 
 namespace Backups.Tests.Tools
 {
-    public class InMemoryRepositoryComposer
+    public static class InMemoryRepositoryComposer
     {
-        private readonly InMemoryRepository _repository;
-
-        public InMemoryRepositoryComposer(InMemoryRepository repository)
-        {
-            _repository = repository;
-        }
-
-        public Tree Compose()
+        public static Tree Compose()
         {
             Tree tree = new Tree(string.Empty);
-            tree.AddNode(CreateNode(_repository.Root));
+            tree.AddNode(CreateNode(InMemoryRepository.Root));
 
             return tree;
         }
