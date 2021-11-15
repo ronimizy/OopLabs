@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using Backups.Entities;
+using Backups.Models;
 
 namespace Backups.RestorePointMatchers
 {
     public interface IRestorePointMatcher
     {
-        IReadOnlyCollection<RestorePoint> GetRestorePointsToRemove(IReadOnlyCollection<RestorePoint> originalPoints);
+        RestorePointsMatchingResult Match(IReadOnlyCollection<RestorePoint> originalPoints);
     }
 }

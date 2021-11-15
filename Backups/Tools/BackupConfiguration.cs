@@ -1,4 +1,5 @@
 using System;
+using Utility.Extensions;
 
 namespace Backups.Tools
 {
@@ -9,5 +10,8 @@ namespace Backups.Tools
 
         public static string FormatDateTime(DateTime dateTime)
             => dateTime.ToString("u");
+
+        public static string GetTypeKey(Type type)
+            => type.FullName.ThrowIfNull(nameof(Type.FullName));
     }
 }

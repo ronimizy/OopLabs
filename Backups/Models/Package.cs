@@ -1,14 +1,14 @@
 using System;
 using System.IO;
-using System.Text.Json.Serialization;
 using Backups.JsonConverters;
+using Newtonsoft.Json;
 using Utility.Extensions;
 
 namespace Backups.Models
 {
     [Serializable]
     [JsonConverter(typeof(PackageJsonConverter))]
-    public class Package
+    public sealed class Package : IDisposable
     {
         [JsonConstructor]
         public Package(string name, Stream stream)
@@ -22,5 +22,8 @@ namespace Backups.Models
 
         public override string ToString()
             => Name;
+
+        public void Dispose()
+            => Stream.Dispose();
     }
 }

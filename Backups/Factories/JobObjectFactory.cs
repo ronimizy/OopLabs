@@ -13,7 +13,7 @@ namespace Backups.Factories
 
         internal JobObjectFactory(Repository repository, ILogger? logger)
         {
-            _repository = repository;
+            _repository = repository.ThrowIfNull(nameof(repository));
             _logger = logger;
         }
 
@@ -26,8 +26,8 @@ namespace Backups.Factories
                 _logger?.OnComment($"JobObjectBuilder for path {path} at repository {_repository} is being created");
 
                 return _repository.IsFolder(path)
-                    ? new JobObjectBuilder(p => new FolderJobObject(path, _repository, this, p))
-                    : new JobObjectBuilder(p => new FileJobObject(path, _repository, p));
+                    ? new JobObjectBuilder(c => new FolderJobObject(path, _repository, c))
+                    : new JobObjectBuilder(c => new FileJobObject(path, _repository, c));
             }
 
             BackupsException exception = BackupsExceptionFactory.RepositoryDoesNotContainRequestedPath(_repository, path);

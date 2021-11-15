@@ -27,8 +27,23 @@ namespace Backups.Packers
             return new Package($"{packageName}{BackupConfiguration.ExtensionDelimiter}zip", ms);
         }
 
+        public Package Extract(Package package, string subPackageName, ILogger? logger)
+        {
+            using var archive = new ZipArchive(package.Stream, ZipArchiveMode.Read, true);
+            logger?.OnComment($"ZipPacker opened archive for package {package}");
+
+            ZipArchiveEntry entry = archive
+                .GetEntry(subPackageName)
+                .ThrowIfNull(BackupsExceptionFactory.MissingSubPackageException(package, subPackageName));
+
+            return new Package(subPackageName, entry.Open());
+        }
+
         public void AddToPackage(Stream package, ILogger? logger, params Package[] packages)
         {
+            package.ThrowIfNull(nameof(package));
+            packages.ThrowIfNull(nameof(packages));
+
             using var archive = new ZipArchive(package, ZipArchiveMode.Update, true);
             logger?.OnComment($"ZipPacker opened an archive for Package: {package}");
 
@@ -38,6 +53,7 @@ namespace Backups.Packers
 
         public void RemoveFromPackage(Stream package, ILogger? logger, params string[] packages)
         {
+            package.ThrowIfNull(nameof(package));
             packages.ThrowIfNull(nameof(packages));
 
             using var archive = new ZipArchive(package, ZipArchiveMode.Update, true);

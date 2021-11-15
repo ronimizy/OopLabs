@@ -4,6 +4,7 @@ using System.IO;
 using Backups.Factories;
 using Backups.RepositoryActions;
 using Backups.Tools;
+using Newtonsoft.Json;
 
 namespace Backups.Repositories
 {
@@ -17,8 +18,14 @@ namespace Backups.Repositories
         }
 
         public string Id { get; }
+
+        [JsonIgnore]
         public JobObjectFactory GetObject { get; }
+
+        [JsonIgnore]
         protected ILogger? Logger { get; }
+
+        public abstract Repository GetSubRepositoryAt(string path);
 
         public abstract bool Exists(string path);
         public abstract bool IsFolder(string path);

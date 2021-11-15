@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Backups.Tools;
+using Utility.Extensions;
 
 namespace Backups.Entities
 {
@@ -10,14 +11,11 @@ namespace Backups.Entities
         private readonly List<RestorePoint> _points;
         private readonly ILogger? _logger;
 
-        public Backup(List<RestorePoint> points, ILogger? logger)
+        public Backup(IReadOnlyCollection<RestorePoint> points, ILogger? logger)
         {
-            _points = points;
+            _points = points.ThrowIfNull(nameof(points)).ToList();
             _logger = logger;
         }
-
-        public Backup(ILogger? logger)
-            : this(new List<RestorePoint>(), logger) { }
 
         public IReadOnlyCollection<RestorePoint> RestorePoints => _points;
 
