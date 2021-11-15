@@ -1,10 +1,10 @@
 using System;
 using System.IO;
-using System.Text.Json.Serialization;
 using Backups.Models;
 using Backups.Repositories;
 using Backups.RepositoryActions;
 using Backups.Tools;
+using Newtonsoft.Json;
 using Utility.Extensions;
 
 namespace Backups.Tcp.RepositoryActions
@@ -12,12 +12,17 @@ namespace Backups.Tcp.RepositoryActions
     [Serializable]
     public class WriteRepositoryAction : IRepositoryAction<object?>
     {
-        [JsonConstructor]
         public WriteRepositoryAction(string path, Stream data)
         {
             Package = new Package(
                 path.ThrowIfNull(nameof(path)),
                 data.ThrowIfNull(nameof(data)));
+        }
+
+        [JsonConstructor]
+        private WriteRepositoryAction(Package package)
+        {
+            Package = package;
         }
 
         public Package Package { get; }

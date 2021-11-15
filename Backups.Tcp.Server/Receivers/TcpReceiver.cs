@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -18,6 +19,7 @@ namespace Backups.Tcp.Server.Receivers
         private readonly TypeLocator _locator;
         private readonly ILogger? _logger;
         private readonly List<Thread> _processorThreads;
+        private readonly List<RepositoryActionProcessor> _processors;
 
         public TcpReceiver(ConnectionConfiguration configuration, Repository repository, TypeLocator locator, ILogger? logger = null)
         {
@@ -26,6 +28,7 @@ namespace Backups.Tcp.Server.Receivers
             _repository = new ConcurrentRepository(repository);
             _listener = new TcpListener(IPAddress.Parse(configuration.Host), configuration.Port);
             _processorThreads = new List<Thread>();
+            _processors = new List<RepositoryActionProcessor>();
         }
 
         public void Run()
@@ -41,6 +44,7 @@ namespace Backups.Tcp.Server.Receivers
 
                     var thread = new Thread(processor.Run);
                     _processorThreads.Add(thread);
+                    _processors.Add(processor);
                     thread.Start();
                 }
             }
@@ -51,8 +55,9 @@ namespace Backups.Tcp.Server.Receivers
             finally
             {
                 _listener.Stop();
-                foreach (Thread thread in _processorThreads)
+                foreach (var (thread, processor) in _processorThreads.Zip(_processors))
                 {
+                    processor.Stop();
                     thread.Join();
                 }
             }
