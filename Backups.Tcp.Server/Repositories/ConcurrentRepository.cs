@@ -15,6 +15,14 @@ namespace Backups.Tcp.Server.Repositories
             _repository = repository;
         }
 
+        public override Repository GetSubRepositoryAt(string path)
+        {
+            lock (_lock)
+            {
+                return new ConcurrentRepository(_repository.GetSubRepositoryAt(path));
+            }
+        }
+
         public override bool Exists(string path)
         {
             lock (_lock)

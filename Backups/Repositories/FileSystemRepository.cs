@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Backups.Tools;
 
 namespace Backups.Repositories
 {
@@ -8,6 +9,9 @@ namespace Backups.Repositories
     {
         public FileSystemRepository(string id)
             : base(id) { }
+
+        public override Repository GetSubRepositoryAt(string path)
+            => new FileSystemRepository($"{Id}{BackupConfiguration.PathDelimiter}{path}");
 
         public override bool Exists(string path)
             => File.Exists(GetFullPath(path)) || Directory.Exists(GetFullPath(path));

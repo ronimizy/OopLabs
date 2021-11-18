@@ -1,74 +1,90 @@
 using System;
 using Backups.Chronometers;
 using Backups.Entities;
-using Backups.PackingAlgorithm;
+using Backups.JobObjects;
+using Backups.Models;
+using Backups.Packers;
 using Backups.Repositories;
 using Backups.RestorePointFilters;
 using Backups.RestorePointMatchers;
+using Backups.StorageAlgorithms;
 using Backups.Tools;
-using Microsoft.Extensions.DependencyInjection;
 using Utility.Extensions;
 
 namespace Backups.BackupJobBuilder
 {
     internal class BackupJobBuilder : IJobNamePicker,
+                                      IJobPackerPicker,
                                       IJobPackingAlgorithmPicker,
                                       IJobChronometerPicker,
                                       IJobWritingRepositoryPicker,
                                       IJobOptionalParameterPicker
     {
-        private readonly IServiceCollection _serviceCollection = new ServiceCollection();
         private string? _name;
+        private IPacker? _packer;
+        private IStorageAlgorithm? _packingAlgorithm;
+        private IChronometer? _chronometer;
+        private Repository? _writingRepository;
+        private IRestorePointFilter? _restorePointFilter;
+        private IRestorePointMatcher? _restorePointMatcher;
+        private ILogger? _logger;
 
-        public IJobPackingAlgorithmPicker Called(string name)
+        public IJobPackerPicker Called(string name)
         {
             _name = name.ThrowIfNull(nameof(name));
             return this;
         }
 
-        public IJobChronometerPicker UsingAlgorithm(IPackingAlgorithm algorithm)
+        public IJobPackingAlgorithmPicker PackingWith(IPacker packer)
         {
-            algorithm.ThrowIfNull(nameof(algorithm));
-            _serviceCollection.AddSingleton(algorithm);
+            _packer = packer.ThrowIfNull(nameof(packer));
+            return this;
+        }
+
+        public IJobChronometerPicker UsingAlgorithm(IStorageAlgorithm algorithm)
+        {
+            _packingAlgorithm = algorithm.ThrowIfNull(nameof(algorithm));
             return this;
         }
 
         public IJobWritingRepositoryPicker TrackingTimeWith(IChronometer chronometer)
         {
-            chronometer.ThrowIfNull(nameof(chronometer));
-            _serviceCollection.AddSingleton(chronometer);
+            _chronometer = chronometer.ThrowIfNull(nameof(chronometer));
             return this;
         }
 
         public IJobOptionalParameterPicker WritingTo(Repository repository)
         {
-            repository.ThrowIfNull(nameof(repository));
-            _serviceCollection.AddSingleton(repository);
+            _writingRepository = repository.ThrowIfNull(nameof(repository));
             return this;
         }
 
         public IJobOptionalParameterPicker WithRestorePointFilteringPolicy(IRestorePointFilter filter, IRestorePointMatcher matcher)
         {
-            filter.ThrowIfNull(nameof(filter));
-            matcher.ThrowIfNull(nameof(matcher));
-
-            _serviceCollection.AddSingleton(filter);
-            _serviceCollection.AddSingleton(matcher);
+            _restorePointFilter = filter.ThrowIfNull(nameof(filter));
+            _restorePointMatcher = matcher.ThrowIfNull(nameof(matcher));
             return this;
         }
 
         public IJobOptionalParameterPicker LoggingWith(ILogger logger)
         {
-            logger.ThrowIfNull(nameof(logger));
-
-            _serviceCollection.AddSingleton(logger);
+            _logger = logger.ThrowIfNull(nameof(logger));
             return this;
         }
 
         public BackupJob Build()
         {
-            IServiceProvider provider = _serviceCollection.BuildServiceProvider();
-            return new BackupJob(_name.ThrowIfNull(nameof(_name)), provider);
+            var configuration = new BackupJobConfiguration(
+                _name.ThrowIfNull(nameof(_name)),
+                _packer.ThrowIfNull(nameof(_packer)),
+                _packingAlgorithm.ThrowIfNull(nameof(_packingAlgorithm)),
+                _writingRepository.ThrowIfNull(nameof(_writingRepository)),
+                _restorePointFilter,
+                _restorePointMatcher,
+                _chronometer.ThrowIfNull(nameof(_chronometer)),
+                _logger);
+
+            return new BackupJob(configuration, Array.Empty<IJobObject>(), Array.Empty<RestorePoint>());
         }
     }
 }

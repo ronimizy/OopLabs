@@ -5,7 +5,7 @@ using System.Linq;
 using Backups.Chronometers;
 using Backups.Entities;
 using Backups.Packers;
-using Backups.PackingAlgorithm;
+using Backups.StorageAlgorithms;
 using Backups.Tests.Mocks;
 using Backups.Tools;
 using NSubstitute;
@@ -34,7 +34,8 @@ namespace Backups.Tests
         {
             _backupJob = BackupJob.Build
                 .Called(JobName)
-                .UsingAlgorithm(new SingleStoragePackingAlgorithm(new ZipPacker()))
+                .PackingWith(new ZipPacker())
+                .UsingAlgorithm(new SingleStorageStorageAlgorithm())
                 .TrackingTimeWith(_chronometer)
                 .WritingTo(_repository)
                 .Build();
@@ -63,8 +64,8 @@ namespace Backups.Tests
                 () => stream = _repository.GetStream(archivePath));
 
             using var archive = new ZipArchive(stream, ZipArchiveMode.Read, true);
-            Assert.IsTrue(archive.Entries.Any(e => e.Name.Equals($"[0]_{firstPath}")));
-            Assert.IsTrue(archive.Entries.Any(e => e.Name.Equals($"[0]_{secondPath}")));
+            Assert.IsTrue(archive.Entries.Any(e => e.Name.Equals($"{firstPath}")));
+            Assert.IsTrue(archive.Entries.Any(e => e.Name.Equals($"{secondPath}")));
         }
     }
 }

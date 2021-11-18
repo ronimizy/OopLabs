@@ -6,9 +6,10 @@ using Backups.Chronometers;
 using Backups.Entities;
 using Backups.Models;
 using Backups.Packers;
-using Backups.PackingAlgorithm;
+using Backups.Repositories;
 using Backups.RestorePointFilters;
 using Backups.RestorePointMatchers;
+using Backups.StorageAlgorithms;
 using Backups.Tests.Mocks;
 using Backups.Tests.Tools;
 using Backups.Tools;
@@ -24,7 +25,7 @@ namespace Backups.Tests
         private const string JobName = "My Backup Job";
 
         private BackupJob _backupJob = null!;
-        private IPackingAlgorithm _packingAlgorithm = null!;
+        private IStorageAlgorithm _storageAlgorithm = null!;
         private IChronometer _chronometer = null!;
         private InMemoryRepository _repository = null!;
         private IRestorePointFilter _pointFilter = null!;
@@ -33,7 +34,7 @@ namespace Backups.Tests
         [SetUp]
         public void Setup()
         {
-            _packingAlgorithm = new SplitStoragePackingAlgorithm(new ZipPacker());
+            _storageAlgorithm = new SplitStorageStorageAlgorithm();
             _chronometer = Substitute.For<IChronometer>();
             _repository = new InMemoryRepository();
             _pointFilter = Substitute.For<IRestorePointFilter>();
@@ -41,7 +42,8 @@ namespace Backups.Tests
 
             _backupJob = BackupJob.Build
                 .Called(JobName)
-                .UsingAlgorithm(_packingAlgorithm)
+                .PackingWith(new ZipPacker())
+                .UsingAlgorithm(_storageAlgorithm)
                 .TrackingTimeWith(_chronometer)
                 .WritingTo(_repository)
                 .WithRestorePointFilteringPolicy(_pointFilter, _pointMatcher)
@@ -71,9 +73,10 @@ namespace Backups.Tests
             _backupJob.RemoveObjects(_backupJob.Objects.First());
             _backupJob.Execute();
 
-            _pointFilter.Received(2).Filter(Arg.Any<Backup>(), _pointMatcher, _packingAlgorithm, _repository, Arg.Any<ILogger>());
+            _pointFilter.Received(2).Filter(
+                Arg.Any<Backup>(), _pointMatcher, _storageAlgorithm, _backupJob.Configuration.Packer, Arg.Any<Repository>(), Arg.Any<ILogger>());
 
-            AnsiConsole.Write(new InMemoryRepositoryComposer(_repository).Compose());
+            AnsiConsole.Write(InMemoryRepositoryComposer.Compose());
 
             string firstRestorePointName = dateTimeFirst.ToString("u");
             string secondRestorePointName = dateTimeSecond.ToString("u");
@@ -86,12 +89,12 @@ namespace Backups.Tests
             Assert.DoesNotThrow(() => secondContents = _repository
                                     .GetContentsOf($"{JobName}{BackupConfiguration.PathDelimiter}{secondRestorePointName}"));
 
-            CollectionAssert.Contains(firstContents, $"[0]_{firstPath}{BackupConfiguration.ExtensionDelimiter}zip");
-            CollectionAssert.Contains(firstContents, $"[0]_{secondPath}{BackupConfiguration.ExtensionDelimiter}zip");
+            CollectionAssert.Contains(firstContents, $"{firstPath}{BackupConfiguration.ExtensionDelimiter}zip");
+            CollectionAssert.Contains(firstContents, $"{secondPath}{BackupConfiguration.ExtensionDelimiter}zip");
 
-            CollectionAssert.Contains(secondContents, $"[1]_{secondPath}{BackupConfiguration.ExtensionDelimiter}zip");
-            CollectionAssert.DoesNotContain(secondContents, $"[1]_{firstPath}{BackupConfiguration.ExtensionDelimiter}zip");
-            CollectionAssert.DoesNotContain(secondContents, $"[0]_{firstPath}{BackupConfiguration.ExtensionDelimiter}zip");
+            CollectionAssert.Contains(secondContents, $"{secondPath}{BackupConfiguration.ExtensionDelimiter}zip");
+            CollectionAssert.DoesNotContain(secondContents, $"{firstPath}{BackupConfiguration.ExtensionDelimiter}zip");
+            CollectionAssert.DoesNotContain(secondContents, $"{firstPath}{BackupConfiguration.ExtensionDelimiter}zip");
         }
     }
 }

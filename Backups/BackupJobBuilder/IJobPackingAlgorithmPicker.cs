@@ -1,9 +1,9 @@
-using Backups.PackingAlgorithm;
+using Backups.StorageAlgorithms;
 
 namespace Backups.BackupJobBuilder
 {
     public interface IJobPackingAlgorithmPicker
     {
-        IJobChronometerPicker UsingAlgorithm(IPackingAlgorithm algorithm);
+        IJobChronometerPicker UsingAlgorithm(IStorageAlgorithm algorithm);
     }
 }

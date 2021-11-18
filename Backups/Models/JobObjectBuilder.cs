@@ -6,14 +6,14 @@ namespace Backups.Models
 {
     public class JobObjectBuilder
     {
-        private readonly Func<IServiceProvider, IJobObject> _creator;
+        private readonly Func<BackupJobConfiguration, IJobObject> _builder;
 
-        internal JobObjectBuilder(Func<IServiceProvider, IJobObject> creator)
+        internal JobObjectBuilder(Func<BackupJobConfiguration, IJobObject> builder)
         {
-            _creator = creator.ThrowIfNull(nameof(creator));
+            _builder = builder.ThrowIfNull(nameof(builder));
         }
 
-        internal IJobObject Create(IServiceProvider provider)
-            => _creator(provider);
+        public IJobObject Build(BackupJobConfiguration configuration)
+            => _builder(configuration);
     }
 }

@@ -6,7 +6,7 @@ namespace Backups.Tcp.Tools
 {
     public static class TcpCommunicationConfiguration
     {
-        private static readonly Encoding Encoding = Encoding.UTF8;
+        public static readonly Encoding Encoding = Encoding.UTF8;
 
         public static int DataChunkSize => 64;
 
@@ -20,15 +20,7 @@ namespace Backups.Tcp.Tools
         public static byte[] EncodeString(string value)
         {
             value.ThrowIfNull(nameof(value));
-
             return Encoding.GetBytes(value);
-        }
-
-        public static string DecodeString(byte[] bytes, int count)
-        {
-            bytes.ThrowIfNull(nameof(bytes));
-
-            return Encoding.GetString(bytes, 0, count);
         }
     }
 }

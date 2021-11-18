@@ -2,38 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Backups.JobObjects;
+using Backups.Repositories;
 using Backups.Tools;
 using Utility.Extensions;
 
 namespace Backups.Entities
 {
-    public sealed class RestorePoint : IEquatable<RestorePoint>
+    public sealed class RestorePoint
     {
-        public RestorePoint(DateTime createdDateTime, IReadOnlyCollection<IJobObject> objects)
+        public RestorePoint(Repository repository, DateTime createdDateTime, IReadOnlyCollection<IJobObject> objects)
         {
-            objects.ThrowIfNull(nameof(objects));
-
-            Id = Guid.NewGuid();
+            Repository = repository.ThrowIfNull(nameof(repository));
             CreatedDateTime = createdDateTime;
-            Entries = objects
-                .Select(o => new JobObjectEntry(o))
-                .ToList();
+            Objects = objects.ThrowIfNull(nameof(objects)).ToList();
         }
 
-        public Guid Id { get; }
+        public Repository Repository { get; }
         public DateTime CreatedDateTime { get; }
-        public IReadOnlyCollection<JobObjectEntry> Entries { get; }
-
-        public bool Equals(RestorePoint? other)
-            => other is not null && other.Id.Equals(Id);
+        public IReadOnlyCollection<IJobObject> Objects { get; }
 
         public override string ToString()
-            => $"[{Id}] - {BackupConfiguration.FormatDateTime(CreatedDateTime)}";
-
-        public override bool Equals(object? obj)
-            => Equals(obj as RestorePoint);
-
-        public override int GetHashCode()
-            => Id.GetHashCode();
+            => BackupConfiguration.FormatDateTime(CreatedDateTime);
     }
 }

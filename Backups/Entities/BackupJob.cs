@@ -2,67 +2,47 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Backups.BackupJobBuilder;
-using Backups.Chronometers;
 using Backups.JobObjects;
 using Backups.Models;
-using Backups.PackingAlgorithm;
 using Backups.Repositories;
-using Backups.RepositoryActions;
-using Backups.RestorePointFilters;
-using Backups.RestorePointMatchers;
+using Backups.Storages;
 using Backups.Tools;
-using Microsoft.Extensions.DependencyInjection;
+using Utility.Extensions;
 
 namespace Backups.Entities
 {
     public class BackupJob
     {
-        private readonly List<IJobObject> _objects = new List<IJobObject>();
+        private readonly List<IJobObject> _objects;
         private readonly Backup _backup;
-        private readonly IPackingAlgorithm _packingAlgorithm;
-        private readonly IChronometer _chronometer;
-        private readonly Repository _writeRepository;
-        private readonly IRestorePointFilter? _restorePointFilter;
-        private readonly IRestorePointMatcher? _restorePointMatcher;
-        private readonly ILogger? _logger;
 
-        private readonly IServiceProvider _provider;
-
-        internal BackupJob(string name, IServiceProvider provider)
+        public BackupJob(
+            BackupJobConfiguration configuration,
+            IReadOnlyCollection<IJobObject> objects,
+            IReadOnlyCollection<RestorePoint> restorePoints)
         {
-            Name = name;
-            _provider = provider;
-            _packingAlgorithm = provider.GetRequiredService<IPackingAlgorithm>();
-            _chronometer = provider.GetRequiredService<IChronometer>();
-            _writeRepository = provider.GetRequiredService<Repository>();
-            _restorePointFilter = provider.GetService<IRestorePointFilter>();
-            _restorePointMatcher = provider.GetService<IRestorePointMatcher>();
-            _logger = provider.GetService<ILogger>();
-            _backup = new Backup(_logger);
-
-            if (_restorePointFilter is null == _restorePointMatcher is null)
-                return;
-
-            BackupsException exception = BackupsExceptionFactory.InvalidFilterMatcherNullability(_restorePointFilter, _restorePointMatcher);
-            _logger?.OnException(exception);
-            throw exception;
+            Configuration = configuration.ThrowIfNull(nameof(configuration));
+            _objects = objects.ToList();
+            _backup = new Backup(restorePoints.ThrowIfNull(nameof(restorePoints)), configuration.Logger);
         }
 
         public static IJobNamePicker Build => new BackupJobBuilder.BackupJobBuilder();
 
-        public string Name { get; }
+        public string Name => Configuration.Name;
         public IReadOnlyCollection<IJobObject> Objects => _objects;
         public IReadOnlyCollection<RestorePoint> Points => _backup.RestorePoints;
+
+        public BackupJobConfiguration Configuration { get; }
 
         public void AddObjects(params JobObjectBuilder[] jobObjects)
         {
             IJobObject[] createdObjects = jobObjects
-                .Select(o => o.Create(_provider))
+                .Select(o => o.Build(Configuration))
                 .ToArray();
 
             _objects.AddRange(createdObjects);
 
-            _logger?.OnMessage(
+            Configuration.Logger?.OnMessage(
                 $"{createdObjects.Length} job objects has been added to the BackupJob: {this}.",
                 string.Join("\n", createdObjects.Select(o => o.ToString())));
         }
@@ -77,8 +57,8 @@ namespace Backups.Entities
             if (exceptions.Any())
             {
                 var exception = new AggregateException(exceptions);
-                _logger?.OnException(exception);
-                _logger?.OnComment($"The total count of untracked objects is {exceptions.Length}");
+                Configuration.Logger?.OnException(exception);
+                Configuration.Logger?.OnComment($"The total count of untracked objects is {exceptions.Length}");
                 throw exception;
             }
 
@@ -87,42 +67,44 @@ namespace Backups.Entities
                 _objects.Remove(jobObject);
             }
 
-            _logger?.OnMessage(
+            Configuration.Logger?.OnMessage(
                 $"{jobObjects.Length} job objects has been removed to the BackupJob: {this}.",
                 string.Join("\n", jobObjects.Select(o => o.ToString())));
         }
 
         public void Execute()
         {
-            _logger?.OnMessage($"BackupJob: {this} started execution.");
+            Configuration.Logger?.OnMessage($"BackupJob: {this} started execution.");
 
-            DateTime createdTime = _chronometer.GetCurrentTime();
+            DateTime createdTime = Configuration.Chronometer.GetCurrentTime();
             string packageName = BackupConfiguration.FormatDateTime(createdTime);
-            _logger?.OnComment($"BackupJob: {this} created restore point created at {packageName}.");
 
-            IReadOnlyCollection<Package> packages = _packingAlgorithm.Pack(packageName, _objects, _logger);
-            _logger?.OnMessage($"BackupJob: {this} packed its objects.");
+            Repository jobRepository = Configuration.WritingRepository.GetSubRepositoryAt($"{Name}");
+            Repository pointRepository = jobRepository.GetSubRepositoryAt($"{packageName}");
+            var restorePoint = new RestorePoint(pointRepository, createdTime, _objects);
+            Configuration.Logger?.OnComment($"BackupJob: {this} created restore point created at {packageName}.");
 
-            _writeRepository.ExecuteAction(new SendPackagesAction($"{Name}{BackupConfiguration.PathDelimiter}{packageName}", packages));
-            _logger?.OnMessage($"BackupJob: {this} written to Repository: {_writeRepository}.");
+            using IStorage storage = Configuration.StorageAlgorithm.Pack(new RestorePointModel(restorePoint), Configuration.Packer, Configuration.Logger);
+            Configuration.Logger?.OnMessage($"BackupJob: {this} packed its objects.");
 
-            var restorePoint = new RestorePoint(createdTime, _objects);
+            storage.WriteTo(pointRepository, Configuration.Logger);
+            Configuration.Logger?.OnMessage($"BackupJob: {this} written to Repository: {Configuration.WritingRepository}.");
+
             _backup.AddPoints(restorePoint);
-            _logger?.OnMessage($"BackupJob: {this} added new RestorePoint {restorePoint} to the Backup.");
+            Configuration.Logger?.OnMessage($"BackupJob: {this} added new RestorePoint {restorePoint} to the Backup.");
 
-            if (_restorePointFilter is not null)
-            {
-                _logger?.OnMessage($"BackupJob: {this} started restore point filtering.");
-                _restorePointFilter.Filter(_backup, _restorePointMatcher!, _packingAlgorithm, _writeRepository, _logger);
-                _logger?.OnMessage($"BackupJob: {this} finished restore point filtering");
-            }
+            if (Configuration.RestorePointFilter is null || Configuration.RestorePointMatcher is null)
+                return;
 
-            foreach (IJobObject jobObject in _objects)
-            {
-                jobObject.IncrementVersion();
-            }
-
-            _logger?.OnComment($"BackupJob: {this} incremented versions of its objects");
+            Configuration.Logger?.OnMessage($"BackupJob: {this} started restore point filtering.");
+            Configuration.RestorePointFilter.Filter(
+                _backup,
+                Configuration.RestorePointMatcher,
+                Configuration.StorageAlgorithm,
+                Configuration.Packer,
+                jobRepository,
+                Configuration.Logger);
+            Configuration.Logger?.OnMessage($"BackupJob: {this} finished restore point filtering");
         }
 
         public override string ToString()
